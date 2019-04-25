@@ -18,8 +18,10 @@ class SnakeRunner:
         globdict = globals()
         globdict['rule_targets'] = []
         globdict['data_targets'] = []
+        globdict['required_params'] = []
         all_rule_targets = []
         all_data_targets = []
+        all_req_params = set()
 
         global config
         config = self.default_config.copy()
@@ -38,8 +40,9 @@ class SnakeRunner:
             exec(compile(code, snakefile, "exec"), globdict)
             all_rule_targets += rule_targets
             all_data_targets += data_targets
+            all_req_params |= set(required_params)
 
-        path_gen.verify_config(config, required_params=[], required_flags=[])
+        path_gen.verify_config(config, required_params=list(all_req_params))
         rtargs, run_wildcards = path_gen.config_to_targets(all_rule_targets, config)
         dtargs, _ = path_gen.path_gen(data_targets, data_path, sources=config['sources'])
 
@@ -48,7 +51,6 @@ class SnakeRunner:
         return config
 
     def run(self, endpoint, dryrun=True, quiet=False):
-        print(dryrun, quiet)
         config = self.generate_config(endpoint)
         cwd = os.getcwd()
 
@@ -80,5 +82,6 @@ class SnakeRunner:
                 os.chdir(cwd)
 
     def add_endpoint(self, name, params):
+        assert self.endpoints.get(name, None) == None, 'Tried to duplicate endpoint: %s' % name
         self.endpoints[name] = params
 

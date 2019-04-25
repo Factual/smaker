@@ -4,25 +4,35 @@ from importlib.machinery import SourceFileLoader
 import snakerunner
 
 @click.command()
-@click.argument('endpoint')
+@click.argument('cmd')
+@click.argument('endpoint', required=False)
 @click.option('--construct', '-c', default='Smakefile')
 @click.option('--dryrun/--no-dryrun', is_flag=True, default=True)
 @click.option('--quiet/--no-quiet', is_flag=True, default=False)
-def main(endpoint, construct, dryrun, quiet):
+def main(cmd, endpoint, construct, dryrun, quiet):
+
+    # this does: "import construct as construct_module"
     spec = spec_from_loader("Smakefile", SourceFileLoader("Smakefile", construct))
-    mod = module_from_spec(spec)
-    spec.loader.exec_module(mod)
+    construct_module = module_from_spec(spec)
+    spec.loader.exec_module(construct_module)
 
     runners = []
-    for val in dir(mod):
-        obj = getattr(mod, val)
+    for val in dir(construct_module):
+        obj = getattr(construct_module, val)
         if isinstance(obj, snakerunner.runner.SnakeRunner):
             runners.append(obj)
 
-    matching = [sn for sn in runners if sn.endpoints.get(endpoint, None) != None]
-    if len(matching) < 0: return 'Endpoint not found'
-    if len(matching) > 1: return 'Duplicate endpoints found; ambiguous command'
-    matching[0].run(endpoint, dryrun=dryrun, quiet=quiet)
+    if cmd == 'list':
+        for r in runners:
+            for e in r.endpoints: print(e)
+        return
+    elif cmd =='run':
+        matching = [sn for sn in runners if sn.endpoints.get(endpoint, None) != None]
+        assert len(matching) != 0, 'Endpoint not found: %s' % endpoint
+        assert len(matching) == 1, 'Endpoint found in multiple runners: %s' % endpoint
+        matching[0].run(endpoint, dryrun=dryrun, quiet=quiet)
+    else:
+        print('Command not recognized')
 
 if __name__=='__main__':
     main()
