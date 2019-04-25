@@ -5,9 +5,11 @@ import snakerunner
 
 @click.command()
 @click.argument('endpoint')
-@click.option('--construct', '-c', default='SConstruct')
-def main(endpoint, construct):
-    spec = spec_from_loader("SConstruct", SourceFileLoader("SConstruct", construct))
+@click.option('--construct', '-c', default='Smakefile')
+@click.option('--dryrun/--no-dryrun', is_flag=True, default=True)
+@click.option('--quiet/--no-quiet', is_flag=True, default=False)
+def main(endpoint, construct, dryrun, quiet):
+    spec = spec_from_loader("Smakefile", SourceFileLoader("Smakefile", construct))
     mod = module_from_spec(spec)
     spec.loader.exec_module(mod)
 
@@ -20,7 +22,7 @@ def main(endpoint, construct):
     matching = [sn for sn in runners if sn.endpoints.get(endpoint, None) != None]
     if len(matching) < 0: return 'Endpoint not found'
     if len(matching) > 1: return 'Duplicate endpoints found; ambiguous command'
-    matching[0].run(endpoint)
+    matching[0].run(endpoint, dryrun=dryrun, quiet=quiet)
 
 if __name__=='__main__':
     main()

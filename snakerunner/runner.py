@@ -1,15 +1,15 @@
 import functools
 from backports import tempfile
 import snakemake
-from . import path_gen
+from snakerunner import path_gen
 import os
 import json
 
 class SnakeRunner:
-    def __init__(self, default_config, default_snakefile):
+    def __init__(self, default_config, default_snakefile, cores=4):
         self.endpoints = {}
         self.default_snakefile = default_snakefile
-        self.cores = 4
+        self.cores = cores
         self.configfile = default_config
         with open(default_config, 'r') as cf:
             self.default_config = json.load(cf)
@@ -47,7 +47,8 @@ class SnakeRunner:
         config['targets'] = rtargs + dtargs
         return config
 
-    def run(self, endpoint):
+    def run(self, endpoint, dryrun=True, quiet=False):
+        print(dryrun, quiet)
         config = self.generate_config(endpoint)
         cwd = os.getcwd()
 
@@ -55,40 +56,29 @@ class SnakeRunner:
             temp_config = os.path.join(temp_dir, 'config.json')
             with open(temp_config, 'w+') as f:
                 json.dump(config, f)
+            if not quiet:
+                print(json.dumps(config, indent=4, sort_keys=True))
+
             res = snakemake.snakemake(
                 self.default_snakefile,
                 configfile=temp_config,
                 cores=self.cores,
-                dryrun=True
+                dryrun=True,
+                quiet=quiet
             )
             assert res, 'Dry run failed'
             os.chdir(cwd)
 
-#        res = snakemake.snakemake(
-            #self.default_snakefile,
-            #configfile=self.default_config,
-            #config=config_overrides,
-            #cores=self.cores,
-            #dryrun=False
-        #)
-#        assert res, 'Workflow failed'
-        #os.chdir(cwd)
+            if not dryrun:
+                res = snakemake.snakemake(
+                    self.default_snakefile,
+                    configfile=temp_config,
+                    cores=self.cores,
+                    dryrun=False
+                )
+                assert res, 'Workflow failed'
+                os.chdir(cwd)
 
     def add_endpoint(self, name, params):
         self.endpoints[name] = params
-
-#sn = SnakeRunner()
-
-#@sn.endpoint
-#def job1(conf):
-    #conf.params = {}
-    #conf.name = 'job1_name'
-
-#@click.command()
-#@click.argument(endpoint)
-#def main(endpoint):
-   #sn.run(endpoint)
-
-#if __name__=='__main__':
-    #main()
 
