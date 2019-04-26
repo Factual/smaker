@@ -1,7 +1,7 @@
 # PA workflow helper / snakemake runner (smaker)
 
 ## Motivation
-This module-based workflow was intended to allow for grouping generic snakemake
+This module-based workflow allows for grouping generic snakemake
 rules that can be:
 
 1) flexibly partitioned and interchanged
@@ -10,57 +10,78 @@ rules that can be:
 
 3) while still benefitting from the static snakemake DAG checking
 
-This architecture supports large batch-style jobs that 
+This architecture is instended for large batch-style jobs that 
 change often. Similarly, this sort of setup impedes cron or static work
-that better suited for Jenkins/Airflow.
+better suited for Jenkins/Airflow.
 
-An example of module restrictions that support a machine learning setup:
+How PA uses modules to organize our machine learning setup:
 
 + Preprocess modules: input raw data, output test/train data
 + Train modules: input train data, output model/model weights/model params
 + Evaluate modules: input test data and model, output statistics/plots
 
-Most of my general work fits within those categories, and new
+All of our work fits within those categories, and new
 modules with the same pattern input/output can be swapped 
-without disrupting other steps. New pre-processors with different
-parameters can be added without changing any other step.
+without disrupting/rewriting other steps. For example, new pre-processors with different 
+parameter requirements can be added without other modules needing to be
+aware of those changes.
 
-Nothing stops you from including additional helper modules, or working outside of that 
-structure, but you have to be aware of inter-module dependencies and
-make sure that structure helps rather than hinders you. At a
-certain point of customization, workflows should just be standalone
-Snakefiles executed the regular way.
+Optional/supported:
++ Additional helper modules
++ working outside of the ML structure
+
+The inter-module dependencies enforce an organization that 
+only makes sense for repetitively changing workflows, however. At a
+certain level of customization, workflows should just be written 
+as standalone Snakefiles.
 
 ## Download
 
 ```
-pip3 install --extra-index-url http://pypi.corp.factual.com/pypi/ smaker
---trusted-host pypi.corp.factual.com
+pip3 install --extra-index-url http://pypi.corp.factual.com/pypi/ smaker --trusted-host pypi.corp.factual.com
 ```
 
 ## Usage
 
-+ Create/find existing construct file with `SnakeRunner` class
++ Create/find existing construct file with `SnakeRunner` (default is
+    `Smakefile` currently in `training/smk`)
 + Add an endpoint with parameters
 + invoke `smaker [endpoint_name]` in the docker container
 
-An example endpoint looks like:
-```
+An example `Smakefile` looks like:
+```python
 import snakerunner
-sn = snakerunner.runner.SnakeRunner(default_snakefile='Snakefile.base',
-default_config='conf/original')
-sn.add_endpoint(name='original_engine_workflow', params={'source':
-['engine'])
+sn = snakerunner.runner.SnakeRunner(default_snakefile='Snakefile.base', default_config='conf/original')
+sn.add_endpoint(name='original_engine_workflow', params={'source':['engine']})
 ```
 
+If you setup the endpoints correctly, the following will list the
+available rules:
 ```
-sudo docker -E training/smk/docker_run_workflow.sh smaker
-original_engine_workflow --dryrun
-sudo docker -E training/smk/docker_run_workflow.sh smaker
-original_engine_workflow
-
+sudo docker -E training/smk/docker_run_workflow.sh smaker list
 ```
 
+The `run` command currently defaults to a dryrun. The `--quiet` flag
+disables rule printing if you just want to statically check if an
+endpoint is configured to run the correct rules.
+```
+sudo docker -E training/smk/docker_run_workflow.sh smaker run original_engine_workflow --quiet
+```
+This command runs a workflow:
+```
+sudo docker -E training/smk/docker_run_workflow.sh smaker run original_engine_workflow --no-dryrun
+```
+
+Open the container in interactive mode to use the executable directly:
+```
+sudo docker -E training/smk/docker_run_workflow.sh /bin/bash
+
+smaker list
+smaker run original_engine_workflow --quiet
+smaker run original_engine_workflow --quiet --no-dryrun
+```
+
+## Executable  organization:
 The `SnakeRunner` class does the following:
 
 + Generate configfile given defaults + function args
