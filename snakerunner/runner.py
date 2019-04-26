@@ -27,6 +27,14 @@ class SnakeRunner:
         config = self.default_config.copy()
         config_overrides = self.endpoints.get(endpoint, None)
         assert config_overrides != None, 'Endpoint %s not defined' % endpoint
+ 
+        # must manually manage nested config dicts (this could be changed)
+        nested_fields = ['params', 'modules']
+        for field in nested_fields:
+            if config_overrides.get(field, None) != None:
+                config[field].update(config_overrides[field])
+                del config_overrides[field]
+
         config.update(config_overrides)
         modules = config['modules']
         flat_config = config.copy()

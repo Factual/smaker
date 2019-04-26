@@ -14,8 +14,9 @@ def path_gen(targets, output_path, parameters={}, sources=[]):
     flags = []
     for k, vals in parameters.items():
         if isinstance(vals, bool):
-            flags.append({k:vals})
+            flags.append((k,vals))
             continue
+
         partials = [subl for l in [[t+'%s%s_'%(k,v) for v in vals] for t in partials] for subl in l]
         template += '%s{%s}_'%(k,k)
 
