@@ -26,7 +26,7 @@ def main(cmd, endpoint, construct, dryrun, quiet):
         for r in runners:
             for e in r.endpoints: print(e)
         return
-    elif cmd =='run':
+    elif cmd == 'run':
         matching = [sn for sn in runners if sn.endpoints.get(endpoint, None) != None]
         assert len(matching) != 0, 'Endpoint not found: %s' % endpoint
         assert len(matching) == 1, 'Endpoint found in multiple runners: %s' % endpoint
