@@ -36,9 +36,11 @@ class SnakeRunner:
                 del config_overrides[field]
 
         config.update(config_overrides)
+        print(config)
         modules = config['modules']
         flat_config = config.copy()
         del flat_config['modules']
+        assert config.get('sources', None) != None, 'Must provide data source namespace (sources field)'
 
         global workflow
         workflow = snakemake.workflow.Workflow(snakefile=self.default_snakefile, overwrite_config=flat_config)
@@ -58,8 +60,12 @@ class SnakeRunner:
         config['targets'] = rtargs + dtargs
         return config
 
-    def run(self, endpoint, dryrun=True, quiet=False):
-        config = self.generate_config(endpoint)
+    def run(self, endpoint, **kwargs):
+        config = self.generate_config(endpoint).copy()
+        config.update(kwargs)
+        print(config)
+        quiet = config.get('quiet', True)
+        dryrun = config.get('dryrun', True)
         cwd = os.getcwd()
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -92,4 +98,10 @@ class SnakeRunner:
     def add_endpoint(self, name, params):
         assert self.endpoints.get(name, None) == None, 'Tried to duplicate endpoint: %s' % name
         self.endpoints[name] = params
+
+    @classmethod
+    def run_undefined_endpoint(cls, configfile, snakefile, workflow_opts, api_opts={'cores': 2}):
+        sn = cls(configfile, snakefile)
+        sn.add_endpoint('_undefined', workflow_opts)
+        sn.run('_undefined', **api_opts)
 

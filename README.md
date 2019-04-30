@@ -61,24 +61,30 @@ available rules:
 sudo docker -E training/smk/docker_run_workflow.sh smaker list
 ```
 
-The `run` command currently defaults to a dryrun. The `--quiet` flag
-disables rule printing if you just want to statically check if an
-endpoint is configured to run the correct rules.
+The other two commands are `run`, which runs a given endpoint, and `fly`
+which invokes a workflow given the configfile, snakefile, and working
+params via command line.
 ```
-sudo docker -E training/smk/docker_run_workflow.sh smaker run original_engine_workflow --quiet
+smaker run original_engine_workflow
+smaker fly --config conf/original.json --snakefile Snakefile.base
+--tile-uri [SOME_URL] --dryrun True --quiet False
 ```
-This command runs a workflow:
-```
-sudo docker -E training/smk/docker_run_workflow.sh smaker run original_engine_workflow --no-dryrun
-```
+
+The `config` and `snakfile` options are required for on the `fly` runs,
+and other options are specific to the workflow.
+
+A list of general command line options can be found in the [snakemake
+API](https://snakemake.readthedocs.io/en/stable/api_reference/snakemake.html). 
+The script separates out snakemake API options, letting the rest pass
+through to the workflow environment.
 
 Open the container in interactive mode to use the executable directly:
 ```
 sudo docker -E training/smk/docker_run_workflow.sh /bin/bash
 
 smaker list
-smaker run original_engine_workflow --quiet
-smaker run original_engine_workflow --quiet --no-dryrun
+smaker run original_engine_workflow --quiet True --dryrun False
+smaker run original_engine_workflow --quiet True --dryrun True
 ```
 
 ## Executable  organization:
