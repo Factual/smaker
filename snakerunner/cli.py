@@ -29,8 +29,9 @@ def run_on_the_fly(snakefile, configfile, extra_modules, workflow_opts, api_opts
 @click.option('--dryrun', type=bool, default=False)
 @click.option('--quiet', type=bool, default=True)
 @click.option('--cores', type=int, default=2)
+@click.option('--unlock', type=bool, default=False)
 @click.pass_context
-def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, dryrun, quiet, cores):
+def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, dryrun, quiet, cores, unlock):
     """Smaker workflow tool
 
     The `run` command is used to execute pre-defined endpoints in a
@@ -54,8 +55,8 @@ def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, d
     this endpoint.
 
     `fly` usage:
-
         smaker fly [api_opts] - [workflow_opts]
+
         smaker fly --snakefile SNAKEFILE --configfile CONFIG [api_opts] - [workflow_opts]
 
     `api_opts` and `workflow_opts` are distinguished in the context of
@@ -73,14 +74,14 @@ def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, d
 
     # generic workflow options (`--[option] [value]` format)
     workflow_opts = { context.args[i][2:]: context.args[i+1] for i in range(0, len(context.args), 2) }
-    api_opts = { 'cores': cores, 'quiet': quiet, 'dryrun': dryrun }
+    api_opts = { 'cores': cores, 'quiet': quiet, 'dryrun': dryrun , 'unlock': unlock }
 
     runners = [ getattr(cmodule, val) for val in dir(cmodule) if isinstance(getattr(cmodule, val), SnakeRunner) ]
 
     if cmd == 'list': list_endpoints(runners)
     elif cmd == 'run': run_endpoint(endpoint, runners, api_opts)
     elif cmd == 'fly': run_on_the_fly(snakefile, configfile, add_module, workflow_opts, api_opts)
-    else: print('Command not recognized')
+    else: print('Command not recognized: %s' % cmd)
 
 if __name__=='__main__':
     main()
