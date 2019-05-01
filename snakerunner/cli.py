@@ -12,6 +12,7 @@ def run_endpoint(endpoint, runners, api_opts):
     matching = [sn for sn in runners if sn.endpoints.get(endpoint, None) != None]
     assert len(matching) != 0, 'Endpoint not found: %s' % endpoint
     assert len(matching) == 1, 'Endpoint found in multiple runners: %s' % endpoint
+    for opt in ['snakefile', 'configfile']: api_opts.pop(opt, None)
     matching[0].run(endpoint, api_opts)
 
 def run_on_the_fly(snakefile, configfile, extra_modules, workflow_opts, api_opts):
@@ -30,6 +31,40 @@ def run_on_the_fly(snakefile, configfile, extra_modules, workflow_opts, api_opts
 @click.option('--cores', type=int, default=2)
 @click.pass_context
 def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, dryrun, quiet, cores):
+    """Smaker workflow tool
+
+    The `run` command is used to execute pre-defined endpoints in a
+    construct file (default=Smakefile).
+
+    `run` usage:
+
+        smaker run [api_opts] endpoint
+        smaker run endpoint [api_opts]
+
+    Use the `list` command to view pre-defined endpoints:
+
+    `list` usage:
+
+        smaker list
+
+    Use the `fly` command to dynamically create and run  endpoints
+    in the same manner you would statically with a construct file.
+    "Fly" can also be used to run regular `Snakefile`s.
+    `--snakefile` and `--configfile` are required parameters for
+    this endpoint.
+
+    `fly` usage:
+
+        smaker fly [api_opts] - [workflow_opts]
+        smaker fly --snakefile SNAKEFILE --configfile CONFIG [api_opts] - [workflow_opts]
+
+    `api_opts` and `workflow_opts` are distinguished in the context of
+    the Snakemake API. Options like `--dryrun, `--quiet`, and `--cores`
+    are passed to the snakemake library runtime, while workflow options
+    are passed to user-defined workflow rules. The `--snakefile` and `--configfile`
+    apt_opts are ignored with the `run` command to maintain consistency between run-time
+    and version-controlled configurations.
+    """
 
     # "import construct as construct_module"
     spec = spec_from_loader("Smakefile", SourceFileLoader("Smakefile", construct))
@@ -37,7 +72,6 @@ def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, d
     spec.loader.exec_module(cmodule)
 
     # generic workflow options (`--[option] [value]` format)
-    if cmd == 'fly': context.args = [endpoint] + context.args
     workflow_opts = { context.args[i][2:]: context.args[i+1] for i in range(0, len(context.args), 2) }
     api_opts = { 'cores': cores, 'quiet': quiet, 'dryrun': dryrun }
 
