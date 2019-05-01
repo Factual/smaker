@@ -1,9 +1,12 @@
-import functools
 from backports import tempfile
+import functools
+import json
+import os
 import snakemake
 from snakerunner import path_gen
-import os
-import json
+
+def pretty_dump(blob):
+    return json.dumps(blob, indent=4, sort_keys=True)
 
 class SnakeRunner:
     def __init__(self, default_config, default_snakefile, cores=4):
@@ -36,7 +39,6 @@ class SnakeRunner:
                 del config_overrides[field]
 
         config.update(config_overrides)
-        print(config)
         modules = config['modules']
         flat_config = config.copy()
         del flat_config['modules']
@@ -60,38 +62,26 @@ class SnakeRunner:
         config['targets'] = rtargs + dtargs
         return config
 
-    def run(self, endpoint, **kwargs):
-        config = self.generate_config(endpoint).copy()
-        config.update(kwargs)
-        print(config)
-        quiet = config.get('quiet', True)
-        dryrun = config.get('dryrun', True)
+    def run(self, endpoint, api_opts):
+        workflow_config = self.generate_config(endpoint).copy()
+        dryrun = api_opts.pop('dryrun', True)
         cwd = os.getcwd()
+
+        print('API options set:\n%s' % pretty_dump(api_opts))
+        if not api_opts.get('quiet', True):
+            print('Workflow opts:\n%s' % pretty_dump(workflow_config))
 
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_config = os.path.join(temp_dir, 'config.json')
-            with open(temp_config, 'w+') as f:
-                json.dump(config, f)
-            if not quiet:
-                print(json.dumps(config, indent=4, sort_keys=True))
+            with open(temp_config, 'w+') as f: json.dump(workflow_config, f)
+            api_opts['configfile'] = temp_config
 
-            res = snakemake.snakemake(
-                self.default_snakefile,
-                configfile=temp_config,
-                cores=self.cores,
-                dryrun=True,
-                quiet=quiet
-            )
+            res = snakemake.snakemake(self.default_snakefile, dryrun=True, **api_opts)
             assert res, 'Dry run failed'
             os.chdir(cwd)
 
             if not dryrun:
-                res = snakemake.snakemake(
-                    self.default_snakefile,
-                    configfile=temp_config,
-                    cores=self.cores,
-                    dryrun=False
-                )
+                res = snakemake.snakemake(self.default_snakefile, dryrun=False, **api_opts)
                 assert res, 'Workflow failed'
                 os.chdir(cwd)
 
@@ -100,8 +90,9 @@ class SnakeRunner:
         self.endpoints[name] = params
 
     @classmethod
-    def run_undefined_endpoint(cls, configfile, snakefile, workflow_opts, api_opts={'cores': 2}):
+    def run_undefined_endpoint(cls, configfile, snakefile, workflow_opts={}, api_opts={'cores': 2}):
+        print('Running with dynamic workflow opts:\n%s' % pretty_dump(workflow_opts))
         sn = cls(configfile, snakefile)
         sn.add_endpoint('_undefined', workflow_opts)
-        sn.run('_undefined', **api_opts)
+        sn.run('_undefined', api_opts)
 
