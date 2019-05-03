@@ -17,13 +17,26 @@ class SnakeRunner:
         with open(default_config, 'r') as cf:
             self.default_config = json.load(cf)
 
+    def _merge_configs(self, base, overrides, nested_fields=['params', 'modules']):
+        for field in nested_fields:
+            if overrides.get(field, None) != None:
+                base[field].update(overrides[field])
+                del overrides[field]
+        base.update(overrides)
+        return base
+
     def run(self, endpoint, api_opts):
-        workflow_config = self.default_config.copy()
-        dryrun = api_opts.pop('dryrun', True)
+        base_config = self.default_config.copy()
+        overrides = self.endpoints.get(endpoint, None)
+        assert overrides != None, 'Endpoint %s not defined' % endpoint
+
+        workflow_config = self._merge_configs(base_config, overrides)
         workflow_config['final_paths'], workflow_config['run_wildcards'] = path_gen.config_to_targets([''], workflow_config)
-        cwd = os.getcwd()
 
         print('API options set:\n%s' % pretty_dump(api_opts))
+        dryrun = api_opts.pop('dryrun', True)
+        cwd = os.getcwd()
+
         if not api_opts.get('quiet', True):
             print('Workflow opts:\n%s' % pretty_dump(workflow_config))
 
