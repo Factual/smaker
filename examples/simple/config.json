@@ -1,0 +1,13 @@
+{
+    "image": "",
+    "workdir": "../../",
+    "output_path": "output/default",
+    "data_path": "examples/data",
+    "modules": {"simple": "examples/simple/Snakefile"},
+    "sources": ["simple_frame.pq"],
+    "params": {
+        "multiplier": [1, 2, 3],
+        "sqrt": true
+    }
+
+}
