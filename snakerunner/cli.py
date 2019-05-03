@@ -73,10 +73,14 @@ def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, d
     spec.loader.exec_module(cmodule)
 
     # generic workflow options (`--[option] [value]` format)
-    workflow_opts = { context.args[i][2:]: context.args[i+1] for i in range(0, len(context.args), 2) }
-    api_opts = { 'cores': cores, 'quiet': quiet, 'dryrun': dryrun , 'unlock': unlock }
+    try:
+        workflow_opts = { context.args[i][2:]: context.args[i+1] for i in range(0, len(context.args), 2) }
+    except:
+        print('Misformatted arguments:\n%s' % context.args)
+        return
 
     runners = [ getattr(cmodule, val) for val in dir(cmodule) if isinstance(getattr(cmodule, val), SnakeRunner) ]
+    api_opts = { 'cores': cores, 'quiet': quiet, 'dryrun': dryrun , 'unlock': unlock }
 
     if cmd == 'list': list_endpoints(runners)
     elif cmd == 'run': run_endpoint(endpoint, runners, api_opts)
