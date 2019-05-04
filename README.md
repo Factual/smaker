@@ -120,6 +120,37 @@ Snakemake format at runtime:
 These fields can be ignored; they are just there to help
 organize where results are dumped.
 
+## Improvements
+
++ Set parameters and modules from the command line. I think the
+    `--add-module` flag works, but I have not spent time testing it. Adding
+    param setting would follow the same structure as I currently have for
+    modules.
+
++ Chain endpoints into uber-DAGs. So instead of having the executor
+    launch with one config, we would separate the run step into: a)
+    iteratively creating configs for each endpoint requested, and then
+    b) injecting (config, snakefile, workdir) tuples into a new
+    snakefile that includes all subworkflows. The backend implementation
+    is straightforward and the executor will work all the same;
+    figuring out how the user should specify
+    endpoints on the front-end is harder. Override `add_endpoint` to
+    take a list of previously defined endpoints? Pass multiple endpoint
+    arguments to the `run` command via the CLI?
+
++ Add either unit or integration tests. The example projects are already
+    integrations tests sort of - if the DAG-builder succeeds and makes
+    the expected dependency graph then smaker has successfully generated wildcards
+    and combined modules. Changes to the confiig structure or
+    subworkflow support would require updating those examples. Unit tests
+    that run `path_gen` and the log/target scrapers would be useful.
+
++ Support a broader range of
+    [Snakemake API options](https://snakemake.readthedocs.io/en/stable/api_reference/snakemake.html).
+    The CLI script needs to individually support these to correcly
+    type-cast before passing them to the snakemake library.
+
+
 ## Pip package management
 [Upload](https://wiki.corp.factual.com/pages/viewpage.action?spaceKey=ENG&title=Factual+Internal+PyPi+Server):
 ```
