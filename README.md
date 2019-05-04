@@ -1,5 +1,14 @@
 # PA workflow helper / snakemake runner (smaker)
 
+## Install
+A `python3` environment and the below command should install all
+required dependencies:
+```
+pip3 install --extra-index-url http://pypi.corp.factual.com/pypi/ smaker --trusted-host pypi.corp.factual.com
+```
+## Tutorial
+See [tutorial here](examples/tutorial.md) for examples.
+
 ## Motivation
 This library supports module-based workflows, composed of generic snakemake
 rules grouped such that they can be:
@@ -31,14 +40,6 @@ To re-iterate, the inter-module dependencies enforce an organization that
 best-suits quickly iterating workflows. At a
 certain level of customization, workflows should just be written 
 as standalone Snakefiles.
-
-## Download
-
-Python 3 is required, and the pip install should install all necessary
-requirements.
-```
-pip3 install --extra-index-url http://pypi.corp.factual.com/pypi/ smaker --trusted-host pypi.corp.factual.com
-```
 
 ## Usage
 
