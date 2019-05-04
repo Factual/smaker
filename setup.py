@@ -11,7 +11,7 @@ setup(
     description='Generalize snakemake workflows',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=['snakerunner'],
+    packages=['smaker'],
     install_requires=[
         ' datrie @ git+https://github.com/pytries/datrie.git',
         'click>=7.0',
