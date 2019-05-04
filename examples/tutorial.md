@@ -4,27 +4,25 @@
 1. [Setup](#setup)
 2. [Background](#background)
 3. [Hello World Pt1](#hello1)
-4. [Hello World Pt2](#hello2)
-5. [Hello World Pt3](#hello3)
-6. [Single module data transform](#single-module)
+4. [Hello World Pt2 (Wildcards)](#hello2)
+5. [Hello World Pt3 (CLI parameters)](#hello3)
+6. [Single-module example](#single-module)
 7. [Multi-module example](#multi-module)
-
+8. [Takeaways](#takeaways)
 
 ## Setup
 
 + Install `smaker`
-+ Install `singularity`
-+ Install `pandas`, `pyarrow`
++ Clone this repo
 
-Make sure your environment has `snakemake` and `smaker` loaded,
-and the working directory contains the
-`examples/` directory from this repo (should have `Snakefile`,
+Cd into the `examples/` directory (should have `Snakefile`,
 `Smakefile`, `simple/`, `hello_world`).
 
 ## Background
 
 Smaker is setup to run "endpoints" statically defined in a "construct"
-file (default=`Smakefile`). Those endpoints have four components:
+file (default=`Smakefile`). 1 endpoint = 1 workflow = 1 snakemake DAG. 
+Endpoints have four components:
 
 1) The default `snakefile`
 
@@ -32,26 +30,24 @@ file (default=`Smakefile`). Those endpoints have four components:
 
 3) Config overrides (`params`) encoded as a python dictionary
 
-4) Endpoints names (used to reference in cli)
+4) Endpoint names (used to reference workflows via CLI)
 
 Default `snakefile` and `configfile` are shared among endpoints
-in a `SnakeRunner` class, which after instantiation collects endpoints
-with a `Snakerunner.add_endpoint(name, params={})` method.
+in a `SnakeRunner` class, which collect similarly structured endpoints
+through `Snakerunner.add_endpoint(name, params={})`.
 
 Constructs can hold several `SnakeRunner` class instances
 with different defaults as long as endpoints aren't shared (currently).
 
-Smaker can also run undefined endpoints by passing parameters at
-run-time, which requires a separation of concerns for static and dynamic
-config values.
+Smaker can also run undefined workflows (no endpoint) by passing parameters at
+run-time (`fly` command show in [part 3](#hello3).
 
-We setup smaker to re-use generic collections of rules
-(modules) as long as the minimal set of params are provided for each
-module. So workflows are essentially ran with a variable number of
-parameters, with each module unaware of what `wildcard` parameters
-are defined (other than the ones it invokes).
+Smaker can re-use generic collections of rules
+(modules) as long as the required params are provided for each
+module (each module is unaware of what `wildcard` parameters
+are defined globally).
 
-That means two config fields are variable (nested):
+That design choice necessetates two variable (nested) config fields:
 
 1) Modules: a dictionary of paths to snakefiles (name:path)
 
@@ -62,9 +58,9 @@ Endpoints can override values in the default `params` dictionary.
 Undedfined workflows can only override top-level config key/value pairs
 outside of the `params` dict (currently).
 
-## Hello World Pt 1
+## Hello World Pt 1 <a name="hello1"></a>
 
-Check is your `smaker` and `snakerunner` deps are installed:
+Check if `smaker` was installed:
 ```
 smaker list
 ```
@@ -74,7 +70,7 @@ downloaded the full repo.
 
 The list of endpoints output from `list` are defined in the `Smakefile`
 by default. If you look in the smakefile you'll see the list of
-endpoints, what `snakefile` and `configfile`s were used to create those
+endpoints, what `snakefile` and `configfile` values were used to create those
 endpoints, and any override parameters.
 
 Run one of the following:
@@ -88,50 +84,62 @@ You should see descriptive output and a printed `Hello World!`.
 
 A second `--no-dryrun` should indicate that the rule was already ran.
 
-## Hello World Pt2
+## Hello World Pt2 - Add Wildcards <a name="hello2"></a>
 
-If you take a look at `examples/hello_world/Snakefile`, you should
-notice two rules - one of which wasn't executed by the "hello" endpoint.
+If you take a look at `hello_world/Snakefile`, you should
+notice two rules - one of which was not executed by the "hello" endpoint.
 
-+ The first rule has an explicit output path.
-+ We used that direct `Snakefile` as the default, preventing module
-	generalization.
++ The first rule has an explicit output path (i.e. no wildcards), so
+    snakemake identifies the rule on its own.
 + The second rule has a generic wildcard output that snakemake
-	excluded from the DAG due to lack of informatiion.
+	excluded from the DAG due to lack of informatiion
 
 The "hello_world" endpoint back in the `Smakefile` uses the top-level
-`Snakefile` as its default. That `snakefile` dynamicaly loads modules
+`Snakefile` as its default, while the "hello" endpoint did not.
+That unique snakefile dynamicaly loads modules
 with an `include` directive, and populates its `all` directive with
-absolute paths needed for snakemake to generalize the DAG and include
-all of the rules that use wildcards. That generalization requires:
+absolute paths needed for snakemake to generalize the DAG to include
+wildcard-dependent rules. That generalization requires:
 
-+ Creating a generic "wildcard specification" (labeled
-	`run_wildcards` in config). This is generated based on the
-	parameters passed by the user to an endpoint, and looks something
-	like (refer to snakemake docs for expl):
++ We must create a generic "wildcard specification" (labeled
+	`run_wildcards` in config) specific to the given
+    endpoint/workflow. This is generated based on the
+	parameters passed by the user, and looks something
+	like this (refer to snakemake docs for more information about
+    wildcards):
 ```
-{source}/distance{distance}_time{time}_{filter}_{skip_step_b}
+{source}/name{name}_{say_hello}
 ```
 
-+ Using that wildcard specification properly in rules so that we can
-	combine modules that are unaware of each other's dependencies.
++ Me must use the wildcard specification properly in rules 
+    so that modules can be unaware of global wildcards.
 
-+ Tagging certain outputs with `FINAL` so that we can tell the snakemake
-	DAG builder which rule(s) are the tip of our desired dependency
-	tree.
++ We must tag certain outputs as `FINAL` to help the snakemake 
+	DAG builder generate the full list of rule dependencies for every
+    combination of input parameters (i.e. which rule(s) are
+    the tip of our desired dependency trees)
 
 If you take a look at `examples/hello_world/Snakefile` again, you will
-notice the usage of the second two points above. The second rule uses a 
-wildcard output with the spec injected with `run_wildcards`, and
-specifies a file that the DAG builder should consider "final".
+notice the usage of the second two points above in the second
+"hello_world" rule.
 
-Creating the proper wildcard spec just requires the user to  provide
-the necessary parameters for the wilcards they use. The 
++ The rule uses the wildcard spec in its `output` directive.
++ The rule uses the params directive to specifiy a file that the 
+    DAG builder will use to build a dependency tree (after smaker
+    expands it with wildcards).
+
+Creating the wildcard spec requires the user to provide
+the necessary parameters for the modules used in an endpoint. The 
 `snakerunner/path_gen.py` file contains the logic for spec generation,
 and the `snakerunner/runner.py` class invokes that logic given the
 user-provided parameters. The "final" files are added in the top-level 
 `Snakefile` class's `all` rule (at which point we can access all sub-`rules`
 of the workflow).
+
+All of that information is printed to the console when dry-running an 
+endpoint, so you can see what the snakemake API is running. If you
+forget to set a parameter, snakemake should throw a wildcard not found
+exception.
 
 To see that process in-action, run one of the following:
 ```
@@ -140,14 +148,14 @@ smaker run hello-world --no-dryrun
 smaker run hello-world --no-dryrun --quiet
 ```
 
-As before, re-running the endpoint should be blocked by the output file 
-existence.
+Re-running those endpoint should be prevented by the output files 
+created in the first run.
 
 As a final step, you can change the configs (or add additional
-endpoints) to tweak the output. In the next step we'll run a dynamic
+endpoints) to tweak the outputs. In the next step we'll run a dynamic
 endpoint to change the `name` value via the command line.
 
-## Hello World Pt3
+## Hello World Pt3 - Set parameters via CLI <a name="hello3"></a>
 
 If you added an endpoint to change the `say_hello` parameter in the last
 step, it would look something like this:
@@ -195,22 +203,22 @@ parameters from the user workflow parameters.
 Dynamically overwriting parameters requires capturing unnamed cli
 options, which comes with some drawbacks.
 
-1) Smaker prevents unnamed cli values with the `run` command.
-Disparities between the recorded endpoint configs and run-time configs
+1) Smaker prevents unnamed cli values when using the `run` command.
+Disparities between recorded endpoint configs and run-time configs
 is undesirable.
 
 2) `--[option] [value]` pairs are expected to be space-separeted (right
 now). An error message should log if you pass un-parseable configs.
 
-3) If you didn't change the `source` value above, the `fly` target
-outputs probably already exist, and the workflow won't re-run.
+3) If you did not change the `source` value above, the `fly` target
+outputs could already exist, and the workflow won't re-run.
 
-## Single module data transform
+## Single-module Example <a name="single-module"></a>
 
 The `simple` folder contains a more complicated example of a
-single-module workflow. The `simple_workflow` endpoint uses files in that 
-folder to make a dataframe -> transform it with a python script ->
-filter it with a bash command:
+single-module workflow. The `simple_workflow` endpoint 
+makes a dataframe -> transform it with a python script ->
+filters it with a bash command:
 ```
 smaker run simple_workflow
 smaker run simple_workflow --no-dryrun
@@ -226,16 +234,17 @@ A couple additional features in that `Snakefile`:
 	tag (as long as we can work backward from the final rule to the
 	inputs, snakemake can generate the full DAG).
 
-+ The dryrun output is considerably more verbose, because we specified
-	several values for the `multiply` parameter.
++ The dryrun output is more verbose, because we specified
+	several values for the `multiply` parameter. That can be muted with
+    `--quiet`.
 
-+ We use Python inline to make the dataframe, which works because the
++ We inlined Python to make the dataframe, which works because the
 	Snakefile is a superset of Python. We had to cast the `output`
-	directive to a string to extract the value into a Python primitive,
-	but otherwise the code changes little from normal Python. In the
-	`hello_world` example we could access `wildcards.say_hello` as a
-	string directly, so there are some syntax inconsistencies to be
-	aware of.
+	directive to a string to extract a Python primitive,
+	but otherwise the looks like normal Python. On the other hand, in the
+	`hello_world` example we accessed `wildcards.say_hello` as a
+	string directly because the `shell` directive allows it.
+    So there are some snakemake syntax peculiarities to be aware of.
 
 + We exec'd a Python script in a shell command, and visually organized the
 	call by splitting it into multiple lines. Refer to
@@ -244,7 +253,7 @@ A couple additional features in that `Snakefile`:
 That `Snakefile` is populated with comments to help explain more
 details regarding that example.
 
-## Multi-module example
+## Multi-module Example <a name="multi-module"></a>
 
 We made smaker to avoid rewriting rules everytime we swap or
 A/B test components of our system. For example, if we use the same ML-trainer
@@ -253,9 +262,9 @@ time.
 
 The previous examples could have been written with explicit rules and ran
 with the standard Snakemake file. This example shows how we can combine
-several modules to take advantage of that generalization.
+several modules to take advantage of smaker's generalization. 
 
-We replicate the ML example's structure in the `complex` folder. There
+We replicated the ML example's structure in the `complex` folder. There
 are three pre-processors, one trainer, and one evaluator module. The
 modules don't actually do anything useful here, they just take unique
 parameters to showcase module flexibility.
@@ -263,31 +272,44 @@ parameters to showcase module flexibility.
 We use three endpoints to run each preprocessor with the trainer +
 evaluator. (In this example we can't run
 `fly`, because the `modules` and `params` config keys are nested, 
-and can't be set by the cli). The config doesn't have to be empty here,
-but we leave it like that anyways. The endpoints are defined in
-`Smakefile`: "complex_prepA", "complex_prepB", complex_prepC".
+and can't be set by the cli. The config did not have to be empty here,
+but we left it like that anyways.)
 
-The executed code is trivial, but the setup is kind of complex even with
-one rule per file. If you run the endpoints you'll see that each uses a
-different set of parameters unique to the modules being run. The
-organization for those parameters is in the `Smakefile` in Python. The
-content of the rules can be customized, as is shown in the other example
+The endpoints are defined in
+`Smakefile`: "complex_prepA", "complex_prepB", complex_prepC". The
+paremeter organization is all in Python.
+
+If you run the endpoints, you will see see each uses a
+different set of parameters unique to the preprocessor being run.
+The content of rules can be customized, as is shown in the other example
 workflows.
+
+If we had not used smaker with this example, we would have needed to write three train and three
+evalute snakefiles to pair with each preprocessor. A normal workflow
+could include dozens of rules per module, several different training
+styles, and last-minute add-on modules for glue-code, monitoring or 
+post-processing. Every tweak introduces a
+mutliplier of complexity and an increasing number of
+files to be copied and maintatined. Smaker lets you generalize and
+to avoid code-duplication.
 
 ## Takeaways
 
-Hopefully the `complex` folder shows how our helper functions can help
+Hopefully the `complex` folder shows how smaker can help
 avoid code-duplication at the cost of some organizational overhead. The
-`hello_world` and `simple` examples try to work upwards to bridge the gap
-between standard snakefiles and our additions.
+`hello_world` and `simple` examples try to show the differences
+between standard snakefiles and our additions, albeit for trivial
+workflows.
 
 In our use-case, "static data, variable workflow", modules can include
-dozens of rules. We often need to add new parameters for testing
-new processing types, models, evaluators, and even unexpected in-between
-or add-on modules. So for us, the feature-richness of Snakemake combined
+dozens of rules. We want to be able to test new preprocessor, 
+models, evaluators, and even unforeseen special cases. 
+So for us, the feature-richness of Snakemake combined
 with the flexibility of smaker satisfies our workflow needs.
 
 Other use-cases might benefit from different
-modularizations, or plain Snakefiles if the use-cases is "variable data,
-static processing."
+modularizations, or plain Snakefiles if the main use-cases is "variable data,
+static processing." It all comes down to a trade-off of immediate
+clarity at the cost of flexibility vs. generalization with upfront
+organizational overheads.
 
