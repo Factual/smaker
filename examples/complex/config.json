@@ -1,0 +1,9 @@
+{
+    "image": "",
+    "workdir": ".",
+    "output_path": "output/default",
+    "data_path": "examples/data",
+    "modules": {},
+    "params": {}
+
+}

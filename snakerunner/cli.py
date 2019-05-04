@@ -26,10 +26,10 @@ def run_on_the_fly(snakefile, configfile, extra_modules, workflow_opts, api_opts
 @click.option('--add-module', '-m', required=[], multiple=True)
 @click.option('--snakefile', type=str, required=False)
 @click.option('--configfile', type=str, required=False)
-@click.option('--dryrun', type=bool, default=False)
-@click.option('--quiet', type=bool, default=True)
+@click.option('--dryrun/--no-dryrun', is_flag=True, default=True)
+@click.option('--quiet/--no-quiet', is_flag=True, default=False)
 @click.option('--cores', type=int, default=2)
-@click.option('--unlock', type=bool, default=False)
+@click.option('--unlock/--no-unlock', is_flag=True, default=False)
 @click.pass_context
 def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, dryrun, quiet, cores, unlock):
     """Smaker workflow tool

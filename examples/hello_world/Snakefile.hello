@@ -8,13 +8,29 @@ sources=config['sources']
 
 run_wildcards=config.get('run_wildcards', '')
 
+# This "hello" rule prints 'Hello World! to the console.
+#
+# We use a full file path in this rule (i.e. no wildcards)
+#
+# A "success" file is written to indicate job completion.
+#
 rule hello:
 	output:
 		touch('%s/hello.success' % output_path)
 	shell:
-		'echo "hello"'
+		'echo "Hello World!"'
 
-rule hello_world:
+# This "hello_or_goodbye" rule takes two parameters:
+#     - param-level "say_hello" flag
+#     - top-level "name" string
+#
+# Because this rule uses wildcards to specify a generic output
+# path, we specify the "FINAL" file to help snakemake
+# build a proper DAG.
+#
+# Also note that this rule depends on "hello"
+#
+rule hello_or_goodbye:
 	input:
 		'%s/hello.success' % output_path
 	output:
@@ -23,7 +39,9 @@ rule hello_world:
 		FINAL='hello_world.success'
 	run:
 		name = config.get('name', 'No One')
+
 		if wildcards.say_hello == 'say_hello':
 			shell('echo "<< Hello %s >>"' % name)
 		else:
 			shell('echo "<< Goodbye %s >>"' % name)
+

@@ -1,0 +1,18 @@
+image=config['image']
+workdir: config['workdir']
+output_path=config['output_path']
+data_path=config['data_path']
+
+run_wildcards=config.get('run_wildcards', '')
+
+rule train:
+	input:	
+		train_data='{output_path}/%s/train_data.pq' % run_wildcards
+	output:
+		model_weights='{output_path}/%s/model_weights.pb' % run_wildcards,
+		model_params='{output_path}/%s/model_parameters.txt' % run_wildcards,
+	shell:
+		'echo \"weights {wildcards.train_param}\" > {output.model_weights}'
+		' &&'
+		' echo "params" > {output.model_params}'	
+

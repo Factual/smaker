@@ -4,11 +4,18 @@ image=config['image']
 workdir: config['workdir']
 output_path=config['output_path']
 data_path=config['data_path']
-sources=config['sources']
 
-run_wildcards=config.get('run_wildcards'], '')
+run_wildcards=config.get('run_wildcards', '')
 
-# rule that creates dataframe and puts it in data path
+# We can directly add python as formal rules.
+
+# Here we create a dataframe and write to a 
+# "data_path" cache.
+#
+# Note that snakemake directives have to be 
+# casted into python types if they're used 
+# directly like this.
+#
 rule make_dataframe:
     output:
         '%s/simple_df.pq' % data_path
@@ -16,13 +23,18 @@ rule make_dataframe:
         first_row = [1] * 10
         second_row = [2] * 10
         third_row = [3] * 10
-        col_names = ['col'+i for i in range(10)]
+        col_names = ['col'+str(i) for i in range(10)]
         row_index = ['ones', 'twos', 'threes']
         data = [first_row, second_row, third_row]
         df = pd.DataFrame(data, columns=col_names, index=row_index)
-        df.to_parquet(output)
+        df.to_parquet(str(output))
 
-# rule that runs multiply from transform
+# We encapsulate python logic into a script here,
+# passing input/output/wildcard parameters.
+#
+# We use the generic "run_wildcards" because we
+# set several "multipliers" and a "sqrt" flag.
+#
 rule transform_dataframe:
     input:
         '%s/simple_df.pq' % data_path
@@ -30,23 +42,36 @@ rule transform_dataframe:
         '{output_path}/%s/transformed.tsv' % run_wildcards
     log:
         '{output_path}/%s/log/transform_dataframe.log' % run_wildcards
-    params:
-        FINAL='transformed.tsv'
     shell:
-        'python3 examples/simple/transform.py'
+        'python3 simple/transform.py'
         ' --input-path {input}'
         ' --output-path {output}'
-        ' --multiplier {wildcards.multiply}'
-        ' --{wildcards.sqrt_opt}'
+        ' --multiplier {wildcards.multiplier}'
+        ' --{wildcards.sqrt}'
         ' &>{log}'
 
-# rule that uses shell command to filter lines by id
-#rule filter_transformed:
-#    input:
-#        '{output_path}/%s/transformed.tsv' % run_wildcards
-#    output:
-#        '{output_path}/%s/filtered.tsv' % run_wilcards
-#    params:
-#        FINAL='filtered.tsv'
-#    shell:
-#        '
+# We switch back to bash here, filtering the tsv
+# output from the last rule. The "filtered.tsv" output
+# should only include the row indexed "ones".
+#
+# Note the params.FINAL='filtered.tsv'. Because we
+# use wildcards in this module, the top-level "all" rule
+# must include at least one rule from each combination of
+# possible wildcards - the DAG tip(s). If there are
+# multiple tips, just specify multiple FINAL files.
+# There's no reason to specify  multiple files from the
+# same DAG-tip rule.
+#
+rule filter_dataframe:
+    input:
+        '{output_path}/%s/transformed.tsv' % run_wildcards
+    output:
+        '{output_path}/%s/filtered.tsv' % run_wildcards
+    log:
+        '{output_path}/%s/log/filter_dataframe.log' % run_wildcards
+    params:
+        FINAL='filtered.tsv'
+    shell:
+        'awk \'/ones/{{print}}\' {input} > {output}'
+        ' 2>{log}'
+
