@@ -1,15 +1,26 @@
-# PA workflow helper / snakemake runner (smaker)
+# Smaker - Generalize Snakemake workflows
+
+## Install
+You'll need:
++ A `python3` environment
++ The dependencies included in the following package:
+```
+pip3 install --extra-index-url http://pypi.corp.factual.com/pypi/ smaker --trusted-host pypi.corp.factual.com
+```
+
+## Tutorial
+See [tutorial here](examples/tutorial.md) for examples.
 
 ## Motivation
 This library supports module-based workflows, composed of generic snakemake
 rules grouped such that they can be:
 
-1) flexibly combined and interchanged
+1) Flexibly combined and interchanged
 
-2) without having to manually manage wildcard inconsistencies between
+2) Without having to manually manage wildcard inconsistencies between
 modules
 
-3) while still benefitting from the static snakemake DAG checking
+3) While still benefitting from the static snakemake DAG checking
 
 This architecture is intended for large batch-style jobs that 
 change often, and the overhead impedes cron or static work
@@ -31,14 +42,6 @@ To re-iterate, the inter-module dependencies enforce an organization that
 best-suits quickly iterating workflows. At a
 certain level of customization, workflows should just be written 
 as standalone Snakefiles.
-
-## Download
-
-Python 3 is required, and the pip install should install all necessary
-requirements.
-```
-pip3 install --extra-index-url http://pypi.corp.factual.com/pypi/ smaker --trusted-host pypi.corp.factual.com
-```
 
 ## Usage
 
@@ -107,18 +110,19 @@ just standard collections of snakemake rules. Because the rule paths are
 generic, we added some fields to wrangle rules into the proper
 Snakemake format at runtime:
 
-+ `output_path`: top-level directory where results will be
-    dumped. Individual workflow runs will have unqiue directories inside
++ `output_path` - Top-level directory where results are written
+    Individual workflow runs have unqiue directories inside
     this output path.
-+ `data_path`: computationally expensive steps whose output is shared among
-    different endpoint can be cached in a separate data directory.
-+ `sources`: ML projects can run pipelines with different
-    data sets. This field allows for a layer of
++ `data_path` - Outputs can be cached in a data directory separate from 
+    standard workflow outputs. This is intended for computationally expensive steps whose
+    outputs are shared between endpoints.
++ `sources` - ML projects can run pipelines with different
+    data sets, and this field can provide a layer of
     caching if certain modules' outputs are used repetitively by
-    downstream modules.
+    downstream modules within the same endpoint.
 
 These fields can be ignored; they are just there to help
-organize where results are dumped.
+organize where results are written.
 
 ## Improvements
 
