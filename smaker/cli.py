@@ -26,7 +26,7 @@ def run_on_the_fly(snakefile, configfile, extra_modules, workflow_opts, api_opts
 @click.option('--add-module', '-m', required=[], multiple=True)
 @click.option('--snakefile', type=str, required=False)
 @click.option('--configfile', type=str, required=False)
-@click.option('--dryrun/--no-dryrun', is_flag=True, default=True)
+@click.option('--dryrun/--no-dryrun', '-n/-p', is_flag=True, default=True)
 @click.option('--quiet/--no-quiet', is_flag=True, default=False)
 @click.option('--cores', type=int, default=2)
 @click.option('--unlock/--no-unlock', is_flag=True, default=False)
