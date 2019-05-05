@@ -1,4 +1,4 @@
-# Smaker - Generalize Snakemake workflows
+# Smaker - Flexible Snakemake workflows
 
 ## Install
 You'll need:
@@ -11,9 +11,33 @@ pip3 install --extra-index-url http://pypi.corp.factual.com/pypi/ smaker --trust
 ## Tutorial
 See [tutorial here](examples/tutorial.md) for examples.
 
+## Background
+[Snakemake](https://snakemake.readthedocs.io/en/stable/) is a great
+workflow tool for data science pipelines that change infrequently.
+The workflow DSL language is clear, concise, supports in-line Python,
+arbitrary parameter grid-search, and features a robust DAG-builder 
+and execution engine that make debugging/running/scaling workflows easy. The docs
+are helpful, the source code is clear, the creator actively gives
+helpful responses to user questions and bugs.
+
+There are many other features, but the main downside is the "pipelines that change
+infrequently" stickler. Most of the time this software is used for
+genomics pipelines that championed clarity, debuggability and computational
+throughput at the cost of workflow flexibility.
+
+We tried to expand the feature set of Snakemake to support workflows
+that change frequently. Our primary use-case is machine learning pipelines
+that add steps and parameters often. It was suprisingly painful to
+A/B test with the standard Snakemake library due to the amount of copied
+code and hard-coded paths: basically a new Snakefile for every change.
+Alternate systems lacked the clarity and debuggability that we liked about
+Snakemake, however, so we used Python's flexibilty to try and work-around
+that limitation.
+
 ## Motivation
-This library supports module-based workflows, composed of generic snakemake
-rules grouped such that they can be:
+This library supports Snakemake workflows composed of
+rules grouped into generic modules. Small generalizations of
+target paths allow modules to be:
 
 1) Flexibly combined and interchanged
 
@@ -23,10 +47,10 @@ modules
 3) While still benefitting from the static snakemake DAG checking
 
 This architecture is intended for large batch-style jobs that 
-change often, and the overhead impedes cron or static work
-better suited for Jenkins/Airflow.
+change often. The overhead likely impedes cron or static work
+better suited for standard Snakemake files/Airflow.
 
-How we structure modules to organize our machine learning setup:
+Our machine learning modularization:
 
 + Preprocess: input raw data, output test/train data
 + Train: input train data, output model/model weights/model params
@@ -36,7 +60,8 @@ All of our work fits within those categories, and new
 modules with the same input/output pattern can be swapped 
 without disrupting/rewriting other steps. For example, new pre-processors with different 
 parameter requirements can be added without other modules needing to be
-aware of those changes.
+aware of those changes. New modules can be written separately and
+ appended without breaking other workflows with overlapping rule sets.
 
 To re-iterate, the inter-module dependencies enforce an organization that 
 best-suits quickly iterating workflows. At a
@@ -57,7 +82,7 @@ sn = snakerunner.runner.SnakeRunner(default_snakefile='Snakefile.base', default_
 sn.add_endpoint(name='original_engine_workflow', params={'source':['engine']})
 ```
 
-A few saample commands are shown below. Refer to the
+A few sample commands are shown below. Refer to the
 [tutorial](examples/tutorial.md) for a more thorough breakdown
 ```
 smaker --help
@@ -97,7 +122,7 @@ library injects workflow flexibility, which the user has to be aware of
 when writing rules. Respectively, paths with wildcards have to use
 what's currently called `run_wildcards` in place of a general output
 path, and "DAG-tip" rules have to be marked with `params.FINAL =
-[path]` so the scheduler can generate the full DAG tree given whatever
+[path]` so the scheduler can generate the DAG tree given whichever
 wildcards are required by the collection of modules.
 
 Refer to the [tutorial](examples/tutorial.md) for a walkthrough
@@ -160,4 +185,3 @@ organize where results are written.
 ```
 python3 setup.py sdist upload -r factual
 ```
-
