@@ -8,6 +8,17 @@ You'll need:
 pip3 install --extra-index-url http://pypi.corp.factual.com/pypi/ smaker --trusted-host pypi.corp.factual.com
 ```
 
+Or if the PyPi package is up:
+```
+pip3 install smaker
+```
+
+Or clone the repo and install:
+```
+git clone https://github.com/max-hoffman/smaker.git
+pip3 install -e smaker
+```
+
 ## Tutorial
 See [tutorial here](examples/tutorial.md) for examples.
 
