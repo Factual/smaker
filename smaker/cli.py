@@ -68,13 +68,14 @@ def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, d
     """
 
     # "import construct as construct_module"
+    assert os.path.isfile(construct), 'Construct file not found: %s' % construct
     spec = spec_from_loader("Smakefile", SourceFileLoader("Smakefile", construct))
     cmodule = module_from_spec(spec)
     spec.loader.exec_module(cmodule)
 
     # generic workflow options (`--[option] [value]` format)
     try:
-        workflow_opts = { context.args[i][2:]: context.args[i+1] for i in range(0, len(context.args), 2) }
+        workflow_opts = { '_'.join(context.args[i][2:].split('-'): context.args[i+1] for i in range(0, len(context.args), 2) }
     except:
         print('Misformatted arguments:\n%s' % context.args)
         return

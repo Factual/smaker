@@ -21,7 +21,7 @@ setup(
     ],
     entry_points={
         'console_scripts': ['smaker=snakerunner.cli:main']
-    }
+    },
     classifiers=[
         "Programming Language :: Python :: 3"
     ]
