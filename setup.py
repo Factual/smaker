@@ -20,7 +20,7 @@ setup(
         'numpy>=1.14.2',
     ],
     entry_points={
-        'console_scripts': ['smaker=snakerunner.cli:main']
+        'console_scripts': ['smaker=smaker.cli:main']
     },
     classifiers=[
         "Programming Language :: Python :: 3"
