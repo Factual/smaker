@@ -1,5 +1,5 @@
 import click
-from snakerunner.runner import SnakeRunner
+from smaker.runner import SnakeRunner
 
 hello = SnakeRunner(default_snakefile='hello_world/Snakefile.hello', default_config='hello_world/config.json')
 hello.add_endpoint('hello', params={})

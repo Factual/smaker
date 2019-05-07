@@ -3,7 +3,7 @@ from importlib.util import spec_from_loader, module_from_spec
 from importlib.machinery import SourceFileLoader
 import json
 import os
-from snakerunner.runner import SnakeRunner
+from smaker.runner import SnakeRunner
 
 def list_endpoints(runners):
     return [ print(e) for r in runners for e in r.endpoints ]
@@ -75,7 +75,7 @@ def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, d
 
     # generic workflow options (`--[option] [value]` format)
     try:
-        workflow_opts = { '_'.join(context.args[i][2:].split('-'): context.args[i+1] for i in range(0, len(context.args), 2) }
+        workflow_opts = { '_'.join(context.args[i][2:].split('-')): context.args[i+1] for i in range(0, len(context.args), 2) }
     except:
         print('Misformatted arguments:\n%s' % context.args)
         return

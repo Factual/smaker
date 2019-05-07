@@ -1,5 +1,5 @@
 import os
-from snakerunner.utils import scrape_error_logs, scrape_final_targets
+from smaker.utils import scrape_error_logs, scrape_final_targets
 
 workdir: config['workdir']
 

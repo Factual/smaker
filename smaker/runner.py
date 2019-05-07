@@ -3,7 +3,7 @@ import functools
 import json
 import os
 import snakemake
-from snakerunner import path_gen
+from smaker import path_gen
 
 def pretty_dump(blob):
     return json.dumps(blob, indent=4, sort_keys=True)

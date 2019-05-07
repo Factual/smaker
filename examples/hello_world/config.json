@@ -2,7 +2,7 @@
     "image": "",
     "workdir": ".",
     "output_path": "output/default",
-    "modules": {"hello": "examples/hello_world/Snakefile.hello"},
+    "modules": {"hello": "hello_world/Snakefile.hello"},
     "sources": ["hello-world"],
     "params": {
 		"say_hello": false
