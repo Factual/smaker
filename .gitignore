@@ -1,0 +1,6 @@
+dist/
+
+*.snakemake
+*__pycache__
+examples/output/
+smaker.egg-info

@@ -3,6 +3,7 @@ from importlib.util import spec_from_loader, module_from_spec
 from importlib.machinery import SourceFileLoader
 import json
 import os
+import sys
 from smaker.runner import SnakeRunner
 
 def list_endpoints(runners):
@@ -83,7 +84,7 @@ def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, d
         workflow_opts.update(false_opts)
     except:
         print('Misformatted arguments:\n%s' % context.args)
-        return
+        raise
 
     runners = [ getattr(cmodule, val) for val in dir(cmodule) if isinstance(getattr(cmodule, val), SnakeRunner) ]
     api_opts = { 'cores': cores, 'quiet': quiet, 'dryrun': dryrun , 'unlock': unlock }
@@ -91,7 +92,9 @@ def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, d
     if cmd == 'list': list_endpoints(runners)
     elif cmd == 'run': run_endpoint(endpoint, runners, api_opts)
     elif cmd == 'fly': run_on_the_fly(snakefile, configfile, add_module, workflow_opts, api_opts)
-    else: print('Command not recognized: %s' % cmd)
+    else:
+        print('Command not recognized: %s' % cmd)
+        raise
 
 if __name__=='__main__':
     main()
