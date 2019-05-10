@@ -3,6 +3,7 @@ from importlib.util import spec_from_loader, module_from_spec
 from importlib.machinery import SourceFileLoader
 import json
 import os
+import sys
 from smaker.runner import SnakeRunner
 
 def list_endpoints(runners):
@@ -67,7 +68,8 @@ def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, d
     are passed to the snakemake library runtime, while workflow options
     are passed to user-defined workflow rules. The `--snakefile` and `--configfile`
     apt_opts are ignored with the `run` command to maintain consistency between run-time
-    and version-controlled configurations.
+    and version-controlled configurations. Workflow opts valued "True/true" or "False/false"
+    are converted boolean.
     """
 
     # "import construct as construct_module"
@@ -79,9 +81,13 @@ def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, d
     # generic workflow options (`--[option] [value]` format)
     try:
         workflow_opts = { '_'.join(context.args[i][2:].split('-')): context.args[i+1] for i in range(0, len(context.args), 2) }
+        true_opts = { k: True for k,v in workflow_opts.items() if v in ['True', 'true'] }
+        false_opts = { k: False for k,v in workflow_opts.items() if v in ['False', 'false'] }
+        workflow_opts.update(true_opts)
+        workflow_opts.update(false_opts)
     except:
         print('Misformatted arguments:\n%s' % context.args)
-        return
+        raise
 
     runners = [ getattr(cmodule, val) for val in dir(cmodule) if isinstance(getattr(cmodule, val), SnakeRunner) ]
     api_opts = { 'cores': cores, 'quiet': quiet, 'dryrun': dryrun , 'unlock': unlock, 'printrulegraph': rulegraph, 'printreason': reason, 'summary':
@@ -90,7 +96,9 @@ def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, d
     if cmd == 'list': list_endpoints(runners)
     elif cmd == 'run': run_endpoint(endpoint, runners, api_opts)
     elif cmd == 'fly': run_on_the_fly(snakefile, configfile, add_module, workflow_opts, api_opts)
-    else: print('Command not recognized: %s' % cmd)
+    else:
+        print('Command not recognized: %s' % cmd)
+        raise
 
 if __name__=='__main__':
     main()

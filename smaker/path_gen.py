@@ -25,6 +25,7 @@ def path_gen(targets, output_path, parameters={}, sources=[]):
             template += '%s{%s}_'%(k,k)
 
     if len(flags) > 0:
+        flags = sorted(flags)
         fpartials = '_'.join(['%s'%f if v else 'no-%s'%f for f,v in flags])
         partials = [p + fpartials for p in partials]
         template += '_'.join(['{%s}'%f for f,v in flags])
