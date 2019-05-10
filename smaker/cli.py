@@ -29,9 +29,12 @@ def run_on_the_fly(snakefile, configfile, extra_modules, workflow_opts, api_opts
 @click.option('--dryrun/--no-dryrun', '-n/-p', is_flag=True, default=True)
 @click.option('--quiet/--no-quiet', is_flag=True, default=False)
 @click.option('--cores', type=int, default=2)
+@click.option('--rulegraph', is_flag=True, default=False)
+@click.option('--reason', is_flag=True, default=False)
+@click.option('--summary', is_flag=True, default=False)
 @click.option('--unlock/--no-unlock', is_flag=True, default=False)
 @click.pass_context
-def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, dryrun, quiet, cores, unlock):
+def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, dryrun, quiet, cores, rulegraph, reason, summary, unlock):
     """Smaker workflow tool
 
     The `run` command is used to execute pre-defined endpoints in a
@@ -81,7 +84,8 @@ def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, d
         return
 
     runners = [ getattr(cmodule, val) for val in dir(cmodule) if isinstance(getattr(cmodule, val), SnakeRunner) ]
-    api_opts = { 'cores': cores, 'quiet': quiet, 'dryrun': dryrun , 'unlock': unlock }
+    api_opts = { 'cores': cores, 'quiet': quiet, 'dryrun': dryrun , 'unlock': unlock, 'printrulegraph': rulegraph, 'printreason': reason, 'summary':
+                summary }
 
     if cmd == 'list': list_endpoints(runners)
     elif cmd == 'run': run_endpoint(endpoint, runners, api_opts)

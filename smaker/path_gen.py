@@ -12,13 +12,17 @@ def path_gen(targets, output_path, parameters={}, sources=[]):
     partials = ['']
     template = ''
     flags = []
+    opts = []
     for k, vals in parameters.items():
         if isinstance(vals, bool):
             flags.append((k,vals))
             continue
+        opts.append((k,vals))
 
-        partials = [subl for l in [[t+'%s%s_'%(k,v) for v in vals] for t in partials] for subl in l]
-        template += '%s{%s}_'%(k,k)
+    if len(opts) > 0:
+        for k,vals in sorted(opts):
+            partials = [subl for l in [[t+'%s%s_'%(k,v) for v in vals] for t in partials] for subl in l]
+            template += '%s{%s}_'%(k,k)
 
     if len(flags) > 0:
         fpartials = '_'.join(['%s'%f if v else 'no-%s'%f for f,v in flags])
