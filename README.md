@@ -100,8 +100,8 @@ smaker --help
 
 smaker list
 
-smaker run --quiet [endpoint]
-smaker run --no-dryrun [endpoint]
+smaker run --quiet -e [endpoint]
+smaker run --no-dryrun -e [endpoint]
 
 smaker fly --configfile CONFIG --snakefile SNAKEFILE - [options]
 

@@ -22,7 +22,7 @@ def run_on_the_fly(snakefile, configfile, extra_modules, workflow_opts, api_opts
 
 @click.command(name='smaker', context_settings=dict(ignore_unknown_options=True, allow_extra_args=True))
 @click.argument('cmd')
-@click.argument('endpoint', required=False)
+@click.option('--endpoint', '-e', required=False)
 @click.option('--construct', '-c', default='Smakefile')
 @click.option('--add-module', '-m', required=[], multiple=True)
 @click.option('--snakefile', type=str, required=False)
@@ -71,6 +71,8 @@ def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, d
     and version-controlled configurations. Workflow opts valued "True/true" or "False/false"
     are converted boolean.
     """
+
+    if cmd == 'run': assert endpoint != None, 'Run requires endpoint name.\nUsage: "smaker run -e [endpoint]"'
 
     # "import construct as construct_module"
     assert os.path.isfile(construct), 'Construct file not found: %s' % construct
