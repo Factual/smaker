@@ -12,49 +12,49 @@ simple.add_endpoint('run_simple', params={})
 
 complex = SnakeRunner(default_snakefile='Snakefile', default_config='complex/config.json')
 shared_complex_params = {
-	'params': {
-		'train_param': ['nn'],
-		'evaluate_param': ['histogram']
-	},
-	'modules': {
-		'train': 'complex/Snakefile.train',
-		'evaluate': 'complex/Snakefile.eval'
-	},
-	'sources': ['complex']
+    'params': {
+        'train_param': ['nn'],
+        'evaluate_param': ['histogram']
+    },
+    'modules': {
+        'train': 'complex/Snakefile.train',
+        'evaluate': 'complex/Snakefile.eval'
+    },
+    'sources': ['complex']
 }
 prepA_params = {
-	'params': {
-		'prep_a_param': ['prep_a'],
-	},
-	'modules': {
-		'preprocess': 'complex/Snakefile.prepA'
-	}
+    'params': {
+        'prep_a_param': ['prep_a'],
+    },
+    'modules': {
+        'preprocess': 'complex/Snakefile.prepA'
+    }
 }
 prepB_params = {
-	'params': {
-		'prep_b_param': ['prep_b'],
-	},
-	'modules': {
-		'preprocess': 'complex/Snakefile.prepB'
-	}
+    'params': {
+        'prep_b_param': ['prep_b'],
+    },
+    'modules': {
+        'preprocess': 'complex/Snakefile.prepB'
+    }
 }
 prepC_params = {
-	'params': {
-		'prep_c_param': ['prep_c'],
-	},
-	'modules': {
-		'preprocess': 'complex/Snakefile.prepC'
-	}
+    'params': {
+        'prep_c_param': ['prep_c'],
+    },
+    'modules': {
+        'preprocess': 'complex/Snakefile.prepC'
+    }
 }
 
 prep_params = [prepA_params, prepB_params, prepC_params]
 nested_fields = ['params', 'modules']
 
 for prep in prep_params:
-	tmp = shared_complex_params.copy()
-	tmp.update(prep)
-	[ tmp[field].update(shared_complex_params[field]) for field in nested_fields ]
-	prep = tmp
+    tmp = shared_complex_params.copy()
+    tmp.update(prep)
+    [ tmp[field].update(shared_complex_params[field]) for field in nested_fields ]
+    prep = tmp
 
 complex.add_endpoint('complex_prepA', params=prepA_params)
 complex.add_endpoint('complex_prepB', params=prepB_params)

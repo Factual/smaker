@@ -15,10 +15,10 @@ run_wildcards=config.get('run_wildcards', '')
 # A "success" file is written to indicate job completion.
 #
 rule hello:
-	output:
-		touch('%s/hello.success' % output_path)
-	shell:
-		'echo "Hello World!"'
+    output:
+        touch('%s/hello.success' % output_path)
+    shell:
+        'echo "Hello World!"'
 
 # This "hello_or_goodbye" rule takes two parameters:
 #     - param-level "say_hello" flag
@@ -31,17 +31,17 @@ rule hello:
 # Also note that this rule depends on "hello"
 #
 rule hello_or_goodbye:
-	input:
-		'%s/hello.success' % output_path
-	output:
-		touch('{output_path}/%s/hello_world.success' % run_wildcards)
-	params:
-		FINAL='hello_world.success'
-	run:
-		name = config.get('name', 'No One')
+    input:
+        '%s/hello.success' % output_path
+    output:
+        touch('{output_path}/%s/hello_world.success' % run_wildcards)
+    params:
+        FINAL='hello_world.success'
+    run:
+        name = config.get('name', 'No One')
 
-		if wildcards.say_hello == 'say_hello':
-			shell('echo "<< Hello %s >>"' % name)
-		else:
-			shell('echo "<< Goodbye %s >>"' % name)
+        if wildcards.say_hello != 'say_hello':
+            shell('echo "<< Hello %s >>"' % name)
+        else:
+            shell('echo "<< Goodbye %s >>"' % name)
 
