@@ -23,19 +23,21 @@ def run_on_the_fly(snakefile, configfile, extra_modules, workflow_opts, api_opts
 @click.command(name='smaker', context_settings=dict(ignore_unknown_options=True, allow_extra_args=True))
 @click.argument('cmd')
 @click.option('--endpoint', '-e', required=False)
-@click.option('--construct', '-c', default='Smakefile')
+@click.option('--construct', default='Smakefile')
 @click.option('--add-module', '-m', required=[], multiple=True)
-@click.option('--snakefile', type=str, required=False)
-@click.option('--configfile', type=str, required=False)
+@click.option('--snakefile', '-s', type=str, required=False)
+@click.option('--configfile', '-c', type=str, required=False)
 @click.option('--dryrun/--no-dryrun', '-n/-p', is_flag=True, default=True)
 @click.option('--quiet/--no-quiet', is_flag=True, default=False)
 @click.option('--cores', type=int, default=2)
 @click.option('--rulegraph', is_flag=True, default=False)
 @click.option('--reason', is_flag=True, default=False)
 @click.option('--summary', is_flag=True, default=False)
+@click.option('--print-shell', '-p', is_flag=True, default=False)
 @click.option('--unlock/--no-unlock', is_flag=True, default=False)
 @click.pass_context
-def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, dryrun, quiet, cores, rulegraph, reason, summary, unlock):
+def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, dryrun, quiet,
+         cores, rulegraph, reason, summary, print_shell, unlock):
     """Smaker workflow tool
 
     The `run` command is used to execute pre-defined endpoints in a
@@ -93,7 +95,7 @@ def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, d
 
     runners = [ getattr(cmodule, val) for val in dir(cmodule) if isinstance(getattr(cmodule, val), SnakeRunner) ]
     api_opts = { 'cores': cores, 'quiet': quiet, 'dryrun': dryrun , 'unlock': unlock, 'printrulegraph': rulegraph, 'printreason': reason, 'summary':
-                summary }
+                summary, 'printshellcmds': print_shell }
 
     if cmd == 'list': list_endpoints(runners)
     elif cmd == 'run': run_endpoint(endpoint, runners, api_opts)
