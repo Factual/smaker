@@ -22,6 +22,8 @@ pip3 install -e smaker
 ## Tutorial
 See [tutorial here](examples/tutorial.md) for examples.
 
+[![asciicast](https://asciinema.org/a/lxzaTPv1Bem1Ga2BR8RBQZmO6.svg)](https://asciinema.org/a/lxzaTPv1Bem1Ga2BR8RBQZmO6)
+
 ## Background
 [Snakemake](https://snakemake.readthedocs.io/en/stable/) is a great
 workflow tool for data science pipelines that change infrequently.
