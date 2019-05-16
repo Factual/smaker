@@ -33,7 +33,7 @@ def run_on_the_fly(snakefile, configfile, extra_modules, workflow_opts, api_opts
 @click.option('--rulegraph', is_flag=True, default=False)
 @click.option('--reason', is_flag=True, default=False)
 @click.option('--summary', is_flag=True, default=False)
-@click.option('--print-shell', '-p', is_flag=True, default=False)
+@click.option('--print-shell', is_flag=True, default=False)
 @click.option('--unlock/--no-unlock', is_flag=True, default=False)
 @click.pass_context
 def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, dryrun, quiet,
