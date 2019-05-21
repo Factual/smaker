@@ -3,6 +3,7 @@
     "workdir": ".",
     "output_path": "output/default",
     "data_path": "examples/data",
+    "sources": ["default"],
     "modules": {},
     "params": {}
 
