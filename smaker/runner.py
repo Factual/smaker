@@ -17,11 +17,18 @@ class SnakeRunner:
         with open(default_config, 'r') as cf:
             self.default_config = json.load(cf)
 
-    def _merge_configs(self, base, overrides, nested_fields=['params', 'modules']):
+    def _merge_configs(self, base, overrides, nested_fields=['params', 'modules', 'sources']):
         for field in nested_fields:
             if overrides.get(field, None) != None:
-                base[field].update(overrides[field])
-                del overrides[field]
+                collection = overrides[field]
+                if isinstance(collection, dict):
+                    if base.get(field, None) == None: base[field] == {}
+                    base[field].update(overrides[field])
+                    del overrides[field]
+                elif isinstance(collection, (tuple, list, set)):
+                    if base.get(field, None) == None: base[field] == []
+                    base[field] += list(collection)
+                    del overrides[field]
         base.update(overrides)
         return base
 

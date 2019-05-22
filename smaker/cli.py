@@ -16,15 +16,17 @@ def run_endpoint(endpoint, runners, api_opts):
     for opt in ['snakefile', 'configfile']: api_opts.pop(opt, None)
     matching[0].run(endpoint, api_opts)
 
-def run_on_the_fly(snakefile, configfile, extra_modules, workflow_opts, api_opts):
-    workflow_opts['modules'] = { os.path.dirname(os.path.basename(mod)): mod for mod in extra_modules if os.path.isfile(mod) }
+def run_on_the_fly(snakefile, configfile, extra_modules, extra_sources, workflow_opts, api_opts):
+    workflow_opts['modules'] = { os.path.dirname(os.path.normpath(mod)): mod for mod in extra_modules if os.path.isfile(mod) }
+    workflow_opts['sources'] = extra_sources
     SnakeRunner.run_undefined_endpoint(configfile, snakefile, workflow_opts, api_opts)
 
 @click.command(name='smaker', context_settings=dict(ignore_unknown_options=True, allow_extra_args=True))
 @click.argument('cmd')
 @click.option('--endpoint', '-e', required=False)
 @click.option('--construct', default='Smakefile')
-@click.option('--add-module', '-m', required=[], multiple=True)
+@click.option('--module', multiple=True)
+@click.option('--source', multiple=True)
 @click.option('--snakefile', '-s', type=str, required=False)
 @click.option('--configfile', '-c', type=str, required=False)
 @click.option('--dryrun/--no-dryrun', '-n/-p', is_flag=True, default=True)
@@ -36,7 +38,7 @@ def run_on_the_fly(snakefile, configfile, extra_modules, workflow_opts, api_opts
 @click.option('--print-shell', is_flag=True, default=False)
 @click.option('--unlock/--no-unlock', is_flag=True, default=False)
 @click.pass_context
-def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, dryrun, quiet,
+def main(context, cmd, endpoint, construct, module, source, snakefile, configfile, dryrun, quiet,
          cores, rulegraph, reason, summary, print_shell, unlock):
     """Smaker workflow tool
 
@@ -99,7 +101,7 @@ def main(context, cmd, endpoint, construct, add_module, snakefile, configfile, d
 
     if cmd == 'list': list_endpoints(runners)
     elif cmd == 'run': run_endpoint(endpoint, runners, api_opts)
-    elif cmd == 'fly': run_on_the_fly(snakefile, configfile, add_module, workflow_opts, api_opts)
+    elif cmd == 'fly': run_on_the_fly(snakefile, configfile, module, source, workflow_opts, api_opts)
     else:
         print('Command not recognized: %s' % cmd)
         raise
