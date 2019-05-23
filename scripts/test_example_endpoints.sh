@@ -14,8 +14,8 @@ set -x
 smaker fly \
     -c simple/config.json \
     -s simple/Snakefile \
-    --source $SOURCE \
-    --output-path $OUTPUT_PATH |\
+    --source=$SOURCE \
+    --output-path=$OUTPUT_PATH |\
     grep "$OUTPUT_PATH/$SOURCE"
 
 smaker fly \
