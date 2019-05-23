@@ -84,9 +84,9 @@ def main(context, cmd, endpoint, construct, module, source, snakefile, configfil
     cmodule = module_from_spec(spec)
     spec.loader.exec_module(cmodule)
 
-    # generic workflow options (`--[option] [value]` format)
     try:
-        workflow_opts = { '_'.join(context.args[i][2:].split('-')): context.args[i+1] for i in range(0, len(context.args), 2) }
+        workflow_opts = [ opt for arg in context.args for opt in arg.split('=') ]
+        workflow_opts = { '_'.join(workflow_opts[i][2:].split('-')): workflow_opts[i+1] for i in range(0, len(workflow_opts), 2) }
         true_opts = { k: True for k,v in workflow_opts.items() if v in ['True', 'true'] }
         false_opts = { k: False for k,v in workflow_opts.items() if v in ['False', 'false'] }
         workflow_opts.update(true_opts)
