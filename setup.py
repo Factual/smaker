@@ -18,6 +18,7 @@ setup(
         'backports.tempfile>=1.0',
         'snakemake>=5.4.5',
         'numpy>=1.14.2',
+        'pandas>=0.24.2'
     ],
     entry_points={
         'console_scripts': ['smaker=smaker.cli:main']

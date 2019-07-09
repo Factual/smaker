@@ -14,6 +14,8 @@ def path_gen(targets, output_path, parameters={}, sources=[]):
     flags = []
     opts = []
     for k, vals in parameters.items():
+        assert '_' not in k, "Cannot put hyphens or underscores in parameter namei: %s" % k
+        assert '-' not in k, "Cannot put hyphens or underscores in parameter namei: %s" % k
         if isinstance(vals, bool):
             flags.append((k,vals))
             continue
