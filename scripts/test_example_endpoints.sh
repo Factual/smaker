@@ -15,14 +15,16 @@ smaker fly \
     -c simple/config.json \
     -s simple/Snakefile \
     --source=$SOURCE \
-    --output-path=$OUTPUT_PATH |\
+    --output-path=$OUTPUT_PATH \
+    --no-quiet |\
     grep "$OUTPUT_PATH/$SOURCE"
 
 smaker fly \
     -c simple/config.json \
     -s simple/Snakefile \
     --source $SOURCE \
-    --output-path $OUTPUT_PATH |\
+    --output-path $OUTPUT_PATH \
+    --no-quiet |\
     grep "$OUTPUT_PATH/default"
 
 smaker fly \

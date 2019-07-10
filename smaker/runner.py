@@ -7,11 +7,30 @@ from smaker import path_gen
 
 def pretty_dump(blob):
     return json.dumps(blob, indent=4, sort_keys=True)
+all_template = """\
+import os
+from smaker.utils import scrape_error_logs, scrape_final_targets
+rule all:
+    input: [ subworkflow_0(os.path.join(o,targ)) for o in config['final_paths'] for targ in scrape_final_targets(rules) ]
+
+onerror:
+    start = '%s\\nPrinting error log:' % ''.join(['=']*100)
+    end = '\\nEnd of error log\\n%s' % ''.join(['=']*100)
+    for error_log in scrape_error_logs(log):
+        shell('echo "%s" && echo "%s\\n" && cat %s && echo "%s"' % (start, error_log, error_log, end))
+"""
+
+def build_multi_snakefile(configs, config_paths, default_snakefile, output_path):
+    subworkflows = [all_template] + [ sw_template % (i, default_snakefile, p) for i, (c,p) in enumerate(zip(configs, config_paths)) ]
+
+    print('\n'.join(subworkflows))
+    with open(output_path, 'w+') as f:
+        f.write('\n'.join(subworkflows))
 
 class SnakeRunner:
-    def __init__(self, default_config, default_snakefile, cores=4):
+    def __init__(self, default_config, default_snakefile,cores=4):
         self.endpoints = {}
-        self.default_snakefile = default_snakefile
+        self.default_snakefile = os.path.abspath(default_snakefile)
         self.cores = cores
         self.configfile = default_config
         with open(default_config, 'r') as cf:
@@ -34,30 +53,35 @@ class SnakeRunner:
 
     def run(self, endpoint, api_opts):
         base_config = self.default_config.copy()
-        overrides = self.endpoints.get(endpoint, None)
-        assert overrides != None, 'Endpoint %s not defined' % endpoint
+        config_overrides = self.endpoints.get(endpoint, None)
+        assert config_overrides !=  None, 'Endpoint %s not defined' % endpoint
 
-        workflow_config = self._merge_configs(base_config, overrides)
-        workflow_config['final_paths'], workflow_config['run_wildcards'] = path_gen.config_to_targets([''], workflow_config)
+        if isinstance(config_overrides, dict): config_overrides = [config_overrides]
+        assert len(config_overrides) > 0, "No configs found: %s" % endpoint
 
-        print('API options set:\n%s' % pretty_dump(api_opts))
+        subworkflow_configs = []
+        for co in config_overrides:
+            workflow_config = self._merge_configs(base_config, co)
+            workflow_config['final_paths'], workflow_config['run_wildcards'] = path_gen.config_to_targets([''], workflow_config)
+            subworkflow_configs += [workflow_config]
+
         dryrun = api_opts.pop('dryrun', True)
         cwd = os.getcwd()
 
-        if not api_opts.get('quiet', True):
-            print('Workflow opts:\n%s' % pretty_dump(workflow_config))
+        print("Number of workflows: %s" % len(subworkflow_configs))
+        if not api_opts.get('quiet', False):
+            print('API options set:\n%s' % pretty_dump(api_opts))
+            print('Workflow opts:\n%s' % pretty_dump(subworkflow_configs))
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            temp_config = os.path.join(temp_dir, 'config.json')
-            with open(temp_config, 'w+') as f: json.dump(workflow_config, f)
-            api_opts['configfile'] = temp_config
+            config_paths = []
+            for idx, config in enumerate(subworkflow_configs):
+                config_path = os.path.abspath(os.path.join(temp_dir, 'config%s.json' % idx))
+                with open(config_path, 'w+') as f: json.dump(config, f)
+                config_paths += [config_path]
 
-            res = snakemake.snakemake(self.default_snakefile, dryrun=True, **api_opts)
-            assert res, 'Dry run failed'
-            os.chdir(cwd)
-
-            if not dryrun:
-                res = snakemake.snakemake(self.default_snakefile, dryrun=False, **api_opts)
+            for config in config_paths:
+                res = snakemake.snakemake(self.default_snakefile, configfile=config, dryrun=dryrun, **api_opts)
                 assert res, 'Workflow failed'
                 os.chdir(cwd)
 

@@ -5,11 +5,11 @@ hello = SnakeRunner(default_snakefile='hello_world/Snakefile.hello', default_con
 hello.add_endpoint('hello', params={})
 
 hello_world = SnakeRunner(default_snakefile='Snakefile', default_config='hello_world/config.json')
-hello_world.add_endpoint('hello_world', params={'sources': ['test'], 'params': {'say_hello': False }})
+hello_world.add_endpoint('hello_world', params={'sources': ['test'], 'params': {'sayhello': False }})
 fixed_params = {
 	'sources': ['test'],
 	'params': {
-		'say_hello': True
+		'sayhello': True
 	},
 	'name': 'World!'
 }
@@ -21,8 +21,8 @@ simple.add_endpoint('run_simple', params={})
 complex = SnakeRunner(default_snakefile='Snakefile', default_config='complex/config.json')
 shared_complex_params = {
     'params': {
-        'train_param': ['nn'],
-        'evaluate_param': ['histogram']
+        'trainparam': ['nn'],
+        'evalparam': ['histogram']
     },
     'modules': {
         'train': 'complex/Snakefile.train',
@@ -32,7 +32,7 @@ shared_complex_params = {
 }
 prepA_params = {
     'params': {
-        'prep_a_param': ['prep_a'],
+        'aparap': ['prep_a'],
     },
     'modules': {
         'preprocess': 'complex/Snakefile.prepA'
@@ -40,7 +40,7 @@ prepA_params = {
 }
 prepB_params = {
     'params': {
-        'prep_b_param': ['prep_b'],
+        'bparam': ['prep_b'],
     },
     'modules': {
         'preprocess': 'complex/Snakefile.prepB'
@@ -48,7 +48,7 @@ prepB_params = {
 }
 prepC_params = {
     'params': {
-        'prep_c_param': ['prep_c'],
+        'cparam': ['prep_c'],
     },
     'modules': {
         'preprocess': 'complex/Snakefile.prepC'
@@ -67,4 +67,6 @@ for prep in prep_params:
 complex.add_endpoint('complex_prepA', params=prepA_params)
 complex.add_endpoint('complex_prepB', params=prepB_params)
 complex.add_endpoint('complex_prepC', params=prepC_params)
+
+complex.add_endpoint('multi_test', params=[prepA_params, prepB_params, prepC_params])
 

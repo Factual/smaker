@@ -12,7 +12,7 @@ rule train:
 		model_weights='{output_path}/%s/model_weights.pb' % run_wildcards,
 		model_params='{output_path}/%s/model_parameters.txt' % run_wildcards,
 	shell:
-		'echo \"weights {wildcards.train_param}\" > {output.model_weights}'
+		'echo \"weights {wildcards.trainparam}\" > {output.model_weights}'
 		' &&'
 		' echo "params" > {output.model_params}'	
 

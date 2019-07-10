@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 
+print(config)
 workdir: config['workdir']
 image=config['image']
 output_path=config['output_path']
@@ -21,7 +22,7 @@ rule hello:
         'echo "Hello World!"'
 
 # This "hello_or_goodbye" rule takes two parameters:
-#     - param-level "say_hello" flag
+#     - param-level "sayhello" flag
 #     - top-level "name" string
 #
 # Because this rule uses wildcards to specify a generic output
@@ -39,7 +40,7 @@ rule hello_or_goodbye:
         FINAL='hello_world.success'
     run:
         name = config.get('name', 'No One')
-        if wildcards.say_hello == 'say_hello':
+        if wildcards.sayhello == 'sayhello':
             shell('echo "<< Hello %s >>"' % name)
         else:
             shell('echo "<< Goodbye %s >>"' % name)
