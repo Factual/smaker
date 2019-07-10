@@ -7,6 +7,7 @@ from smaker import path_gen
 
 def pretty_dump(blob):
     return json.dumps(blob, indent=4, sort_keys=True)
+
 all_template = """\
 import os
 from smaker.utils import scrape_error_logs, scrape_final_targets
@@ -19,13 +20,6 @@ onerror:
     for error_log in scrape_error_logs(log):
         shell('echo "%s" && echo "%s\\n" && cat %s && echo "%s"' % (start, error_log, error_log, end))
 """
-
-def build_multi_snakefile(configs, config_paths, default_snakefile, output_path):
-    subworkflows = [all_template] + [ sw_template % (i, default_snakefile, p) for i, (c,p) in enumerate(zip(configs, config_paths)) ]
-
-    print('\n'.join(subworkflows))
-    with open(output_path, 'w+') as f:
-        f.write('\n'.join(subworkflows))
 
 class SnakeRunner:
     def __init__(self, default_config, default_snakefile,cores=4):
