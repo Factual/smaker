@@ -39,7 +39,7 @@ rule hello_or_goodbye:
         FINAL='hello_world.success'
     run:
         name = config.get('name', 'No One')
-        if wildcards.sayhello == 'sayhello':
+        if wildcards.say_hello:
             shell('echo "<< Hello %s >>"' % name)
         else:
             shell('echo "<< Goodbye %s >>"' % name)

@@ -12,7 +12,7 @@ def pretty_dump(blob):
     return json.dumps(blob, indent=4, sort_keys=True)
 
 class TqdmExtraFormat(tqdm):
-    """Provides a `total_time` format parameter"""
+    "Style change copied from tqdm documentation"
     @property
     def format_dict(self):
         d = super(TqdmExtraFormat, self).format_dict
@@ -58,9 +58,11 @@ class SnakeRunner:
         return base
 
     def run(self, endpoint, api_opts):
+        dryrun = api_opts.pop('dryrun', True)
+        cwd = os.getcwd()
+
         config_overrides = self.endpoints.get(endpoint, None)
         assert config_overrides !=  None, 'Endpoint %s not defined' % endpoint
-
         if isinstance(config_overrides, dict): config_overrides = [config_overrides]
         assert len(config_overrides) > 0, "No configs found: %s" % endpoint
 
@@ -71,23 +73,18 @@ class SnakeRunner:
             workflow_config['final_paths'], workflow_config['run_wildcards'] = path_gen.config_to_targets([''], workflow_config)
             subworkflow_configs += [workflow_config]
 
-        dryrun = api_opts.pop('dryrun', True)
-        cwd = os.getcwd()
-
         if not api_opts.get('quiet', False):
             print('API options set:\n%s' % pretty_dump(api_opts))
             print('Workflow opts:\n%s' % pretty_dump(subworkflow_configs))
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            config_paths = []
-            for idx, config in enumerate(subworkflow_configs):
-                config_path = os.path.abspath(os.path.join(temp_dir, 'config%s.json' % idx))
-                with open(config_path, 'w+') as f: json.dump(config, f)
-                config_paths += [config_path]
+            config_paths = [os.path.abspath(os.path.join(temp_dir, 'config%s.json' % idx)) for idx in range(len(subworkflow_configs))]
+            for config, path in zip(subworkflow_configs, config_paths):
+                with open(path, 'w+') as f: json.dump(config, f)
 
             pbar = TqdmExtraFormat(config_paths, ascii=True , bar_format="{total_time}: {percentage:.0f}%|{bar}{r_bar}")
-            for i, config in enumerate(pbar):
-                res = snakemake.snakemake(self.default_snakefile, configfile=config, dryrun=dryrun, **api_opts)
+            for i, cpath in enumerate(pbar):
+                res = snakemake.snakemake(self.default_snakefile, configfile=cpath, dryrun=dryrun, **api_opts)
                 assert res, 'Workflow failed'
                 os.chdir(cwd)
 
