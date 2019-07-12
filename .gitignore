@@ -1,5 +1,5 @@
 dist/
-
+build/
 *.snakemake
 *__pycache__
 examples/output/

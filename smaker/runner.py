@@ -46,7 +46,6 @@ class SnakeRunner:
         return base
 
     def run(self, endpoint, api_opts):
-        base_config = self.default_config.copy()
         config_overrides = self.endpoints.get(endpoint, None)
         assert config_overrides !=  None, 'Endpoint %s not defined' % endpoint
 
@@ -55,6 +54,7 @@ class SnakeRunner:
 
         subworkflow_configs = []
         for co in config_overrides:
+            base_config = self.default_config.copy()
             workflow_config = self._merge_configs(base_config, co)
             workflow_config['final_paths'], workflow_config['run_wildcards'] = path_gen.config_to_targets([''], workflow_config)
             subworkflow_configs += [workflow_config]
