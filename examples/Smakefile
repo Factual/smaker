@@ -32,7 +32,7 @@ shared_complex_params = {
 }
 prepA_params = {
     'params': {
-        'aparap': ['prep_a'],
+        'aparam': ['prep_a'],
     },
     'modules': {
         'preprocess': 'complex/Snakefile.prepA'

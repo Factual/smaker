@@ -4,9 +4,21 @@ import json
 import os
 import snakemake
 from smaker import path_gen
+from tqdm import tqdm
+import copy
+import time
 
 def pretty_dump(blob):
     return json.dumps(blob, indent=4, sort_keys=True)
+
+class TqdmExtraFormat(tqdm):
+    """Provides a `total_time` format parameter"""
+    @property
+    def format_dict(self):
+        d = super(TqdmExtraFormat, self).format_dict
+        total_time = d["elapsed"] * (d["total"] or 0) / max(d["n"], 1)
+        d.update(total_time=self.format_interval(total_time) + " in total")
+        return d
 
 all_template = """\
 import os
@@ -54,7 +66,7 @@ class SnakeRunner:
 
         subworkflow_configs = []
         for co in config_overrides:
-            base_config = self.default_config.copy()
+            base_config = copy.deepcopy(self.default_config)
             workflow_config = self._merge_configs(base_config, co)
             workflow_config['final_paths'], workflow_config['run_wildcards'] = path_gen.config_to_targets([''], workflow_config)
             subworkflow_configs += [workflow_config]
@@ -62,7 +74,6 @@ class SnakeRunner:
         dryrun = api_opts.pop('dryrun', True)
         cwd = os.getcwd()
 
-        print("Number of workflows: %s" % len(subworkflow_configs))
         if not api_opts.get('quiet', False):
             print('API options set:\n%s' % pretty_dump(api_opts))
             print('Workflow opts:\n%s' % pretty_dump(subworkflow_configs))
@@ -74,7 +85,8 @@ class SnakeRunner:
                 with open(config_path, 'w+') as f: json.dump(config, f)
                 config_paths += [config_path]
 
-            for config in config_paths:
+            pbar = TqdmExtraFormat(config_paths, ascii=True , bar_format="{total_time}: {percentage:.0f}%|{bar}{r_bar}")
+            for i, config in enumerate(pbar):
                 res = snakemake.snakemake(self.default_snakefile, configfile=config, dryrun=dryrun, **api_opts)
                 assert res, 'Workflow failed'
                 os.chdir(cwd)

@@ -1,7 +1,6 @@
 import pandas as pd
 import os
 
-print(config)
 workdir: config['workdir']
 image=config['image']
 output_path=config['output_path']

@@ -16,7 +16,7 @@ smaker fly \
     -s simple/Snakefile \
     --source=$SOURCE \
     --output-path=$OUTPUT_PATH \
-    --no-quiet |\
+    -v |\
     grep "$OUTPUT_PATH/$SOURCE"
 
 smaker fly \
@@ -24,17 +24,17 @@ smaker fly \
     -s simple/Snakefile \
     --source $SOURCE \
     --output-path $OUTPUT_PATH \
-    --no-quiet |\
+    -v |\
     grep "$OUTPUT_PATH/default"
 
 smaker fly \
     -c simple/config.json \
     -s Snakefile \
     --module hello_world/Snakefile.hello \
-    --quiet
+    -q
 
 for endpoint in $(smaker list); do
-    smaker run -e $endpoint --quiet
+    smaker run -e $endpoint -q
 done
 set +x
 
