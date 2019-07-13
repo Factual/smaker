@@ -5,6 +5,6 @@
     "modules": {"hello": "hello_world/Snakefile.hello"},
     "sources": ["hello-world"],
     "params": {
-		"sayhello": false
+		"say_hello": false
     }
 }
