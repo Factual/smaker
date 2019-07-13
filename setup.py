@@ -5,7 +5,7 @@ with open('README.md', 'r') as f:
 
 setup(
     name='smaker',
-    version='0.0.2',
+    version='0.0.3',
     author='Max Hoffman',
     author_email='max@factual.com',
     description='Generalize snakemake workflows',
@@ -24,6 +24,6 @@ setup(
         'console_scripts': ['smaker=smaker.cli:main']
     },
     classifiers=[
-        "Programming Language :: Python :: 3"
+        "Programming Language :: Python :: 3.5"
     ]
 )

@@ -31,10 +31,10 @@ smaker fly \
     -c simple/config.json \
     -s Snakefile \
     --module hello_world/Snakefile.hello \
-    -q
+    --quiet
 
 for endpoint in $(smaker list); do
-    smaker run -e $endpoint -q
+    smaker run -e $endpoint --quiet
 done
 set +x
 
