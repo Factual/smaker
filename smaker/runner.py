@@ -6,7 +6,6 @@ import snakemake
 from smaker import path_gen
 from tqdm import tqdm
 import copy
-import time
 
 def pretty_dump(blob):
     return json.dumps(blob, indent=4, sort_keys=True)

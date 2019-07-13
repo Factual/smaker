@@ -21,7 +21,7 @@ rule hello:
         'echo "Hello World!"'
 
 # This "hello_or_goodbye" rule takes two parameters:
-#     - param-level "sayhello" flag
+#     - param-level "say_hello" flag
 #     - top-level "name" string
 #
 # Because this rule uses wildcards to specify a generic output
