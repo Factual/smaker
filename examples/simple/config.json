@@ -7,7 +7,7 @@
     "modules": {"simple": "simple/Snakefile"},
     "params": {
         "multiplier": [1, 2, 3],
-        "sqrt": true
+        "sqrt": [true]
     }
 
 }

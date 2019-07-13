@@ -30,7 +30,7 @@ def run_on_the_fly(snakefile, configfile, extra_modules, extra_sources, workflow
 @click.option('--snakefile', '-s', type=str, required=False)
 @click.option('--configfile', '-c', type=str, required=False)
 @click.option('--dryrun/--no-dryrun', '-n/-p', is_flag=True, default=True)
-@click.option('--quiet/--no-quiet', is_flag=True, default=False)
+@click.option('--quiet/--verbose', '-q/-v', is_flag=True, default=False)
 @click.option('--cores', type=int, default=2)
 @click.option('--rulegraph', is_flag=True, default=False)
 @click.option('--reason', is_flag=True, default=False)

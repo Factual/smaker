@@ -10,7 +10,7 @@ rule preprocessC:
 		test_data='{output_path}/%s/test_data.pq' % run_wildcards,
 		train_data='{output_path}/%s/train_data.pq' % run_wildcards
 	shell:
-		'echo "train data + {wildcards.prep_c_param}" > {output.train_data}'
+		'echo "train data + {wildcards.c_param}" > {output.train_data}'
 		'&& '
-		' echo "test data + {wildcards.prep_c_param}" > {output.test_data}'
+		' echo "test data + {wildcards.c_param}" > {output.test_data}'
 

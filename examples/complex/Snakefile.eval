@@ -16,7 +16,7 @@ rule eval:
 	params:
 		FINAL='summary1.txt'
 	shell:
-		'echo \"{wildcards.evaluate_param} {input.test_data} summary\" > {output.json_summary}'
+		'echo \"{wildcards.eval_param} {input.test_data} summary\" > {output.json_summary}'
 		' &&'
-		' echo \"{wildcards.evaluate_param} {input.model_weights} summary\" > {output.text_summary}'
+		' echo \"{wildcards.eval_param} {input.model_weights} summary\" > {output.text_summary}'
 
