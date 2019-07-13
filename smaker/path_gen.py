@@ -13,7 +13,7 @@ def path_gen(targets, output_path, parameters={}, sources=[]):
     template = ''
     opts = []
     for k, vals in parameters.items():
-        assert '-' not in k, 'Cannot put hyphens or underscores in parameter name: %s' % k
+        assert '-' not in k, 'Cannot put hyphens in parameter name: %s' % k
         if not isinstance(vals, (list, np.ndarray)):
             vals = [vals]
         opts.append((k,vals))

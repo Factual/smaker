@@ -22,8 +22,9 @@ class TqdmExtraFormat(tqdm):
 all_template = """\
 import os
 from smaker.utils import scrape_error_logs, scrape_final_targets
+
 rule all:
-    input: [ subworkflow_0(os.path.join(o,targ)) for o in config['final_paths'] for targ in scrape_final_targets(rules) ]
+    input: [ os.path.join(o,targ) for o in config['final_paths'] for targ in scrape_final_targets(rules) ]
 
 onerror:
     start = '%s\\nPrinting error log:' % ''.join(['=']*100)
@@ -33,11 +34,11 @@ onerror:
 """
 
 class SnakeRunner:
-    def __init__(self, default_config, default_snakefile,cores=4):
+    def __init__(self, default_config, default_snakefile, cores=4):
         self.endpoints = {}
-        self.default_snakefile = os.path.abspath(default_snakefile)
         self.cores = cores
         self.configfile = default_config
+        self.default_snakefile = os.path.abspath(default_snakefile)
         with open(default_config, 'r') as cf:
             self.default_config = json.load(cf)
 
