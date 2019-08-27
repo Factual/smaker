@@ -3,7 +3,7 @@ import functools
 import json
 import os
 import snakemake
-from smaker import path_gen
+import smaker
 from tqdm import tqdm
 import copy
 
@@ -70,7 +70,7 @@ class SnakeRunner:
         for co in config_overrides:
             base_config = copy.deepcopy(self.default_config)
             workflow_config = self._merge_configs(base_config, co)
-            workflow_config['final_paths'], workflow_config['run_wildcards'] = path_gen.config_to_targets([''], workflow_config)
+            workflow_config['final_paths'], workflow_config['run_wildcards'] = smaker.config_to_targets([''], workflow_config)
             subworkflow_configs += [workflow_config]
 
         if not api_opts.get('quiet', False):
