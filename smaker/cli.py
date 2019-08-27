@@ -36,10 +36,11 @@ def run_on_the_fly(snakefile, configfile, extra_modules, extra_sources, workflow
 @click.option('--reason', is_flag=True, default=False)
 @click.option('--summary', is_flag=True, default=False)
 @click.option('--print-shell', is_flag=True, default=False)
+@click.option('--forceall', '-F', is_flag=True, default=False)
 @click.option('--unlock/--no-unlock', is_flag=True, default=False)
 @click.pass_context
 def main(context, cmd, endpoint, construct, module, source, snakefile, configfile, dryrun, quiet,
-         cores, rulegraph, reason, summary, print_shell, unlock):
+         cores, rulegraph, reason, summary, print_shell, forceall, unlock):
     """Smaker workflow tool
 
     The `run` command is used to execute pre-defined endpoints in a
@@ -97,7 +98,7 @@ def main(context, cmd, endpoint, construct, module, source, snakefile, configfil
 
     runners = [ getattr(cmodule, val) for val in dir(cmodule) if isinstance(getattr(cmodule, val), SnakeRunner) ]
     api_opts = { 'cores': cores, 'quiet': quiet, 'dryrun': dryrun , 'unlock': unlock, 'printrulegraph': rulegraph, 'printreason': reason, 'summary':
-                summary, 'printshellcmds': print_shell }
+                summary, 'printshellcmds': print_shell, 'forceall': forceall }
 
     if cmd == 'list': list_endpoints(runners)
     elif cmd == 'run': run_endpoint(endpoint, runners, api_opts)
