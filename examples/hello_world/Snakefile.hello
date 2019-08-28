@@ -17,8 +17,9 @@ run_wildcards=config.get('run_wildcards', '')
 rule hello:
     output:
         touch('%s/hello.success' % output_path)
+    threads: 3
     shell:
-        'echo "Hello World!"'
+        'echo "Hello World! {threads}"'
 
 # This "hello_or_goodbye" rule takes two parameters:
 #     - param-level "say_hello" flag

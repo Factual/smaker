@@ -30,9 +30,9 @@ def path_gen(targets, output_path, parameters={}, sources=[]):
         full_paths = [os.path.join(output_path, s, p, t) for t in targets for p in partials for s in sources]
         template = os.path.join('{source}', template)
     else:
-        # full_paths = [os.path.join(output_path, p, t) for t in targets for p in partials]
-        print('Source must be defined. Path-collapsing intentionally not supported at this time')
-        raise
+        full_paths = [os.path.join(output_path, p, t) for t in targets for p in partials]
+
+    full_paths = [p[:-1] if p[-1] == '/' else p for p in full_paths]
 
     return full_paths, os.path.normpath(template)
 
