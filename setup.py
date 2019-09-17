@@ -5,7 +5,7 @@ with open('README.md', 'r') as f:
 
 setup(
     name='smaker',
-    version='0.0.4',
+    version='0.0.5',
     author='Max Hoffman',
     author_email='max@factual.com',
     description='Generalize snakemake workflows',
@@ -18,7 +18,8 @@ setup(
         'backports.tempfile>=1.0',
         'snakemake>=5.4.5',
         'numpy>=1.14.2',
-        'pandas>=0.24.2'
+        'pandas>=0.24.2',
+        'tqdm>=4.32.2'
     ],
     entry_points={
         'console_scripts': ['smaker=smaker.cli:main']
