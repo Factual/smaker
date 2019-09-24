@@ -47,7 +47,7 @@ rule transform_dataframe:
         ' --input-path {input}'
         ' --output-path {output}'
         ' --multiplier {wildcards.multiplier}'
-        ' --{wildcards.sqrt}'
+        ' --sqrt {wildcards.sqrt}'
         ' &>{log}'
 
 # We switch back to bash here, filtering the tsv
