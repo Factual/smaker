@@ -197,8 +197,7 @@ smaker fly --snakefile Snakefile --configfile hello_world/config.json --no-dryru
 ```
 
 Because the endpoints aren't named, you have to supply the default
-config and snakefile. Also note the "-" to separate snakemake's API
-parameters from the user workflow parameters.
+config and snakefile. 
 
 Dynamically overwriting parameters requires capturing unnamed cli
 options, which comes with some drawbacks.
