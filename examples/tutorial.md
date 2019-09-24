@@ -75,9 +75,9 @@ endpoints, and any override parameters.
 
 Run one of the following:
 ```
-smaker run hello
-smaker run --no-dryrun hello
-smaker run --quiet --no-dryrun hello
+smaker run -e hello
+smaker run --no-dryrun -e hello
+smaker run --quiet --no-dryrun -e hello
 ```
 
 You should see descriptive output and a printed `Hello World!`.
@@ -143,9 +143,9 @@ exception.
 
 To see that process in-action, run one of the following:
 ```
-smaker run hello-world
-smaker run hello-world --no-dryrun
-smaker run hello-world --no-dryrun --quiet
+smaker run -e hello-world
+smaker run -e hello-world --no-dryrun
+smaker run -e hello-world --no-dryrun --quiet
 ```
 
 Re-running those endpoint should be prevented by the output files 
@@ -181,10 +181,10 @@ hello_world.add_endpoint('say_hello_world', params=hello_world_params)
 
 Invoking these two endpoints looks like:
 ```
-smaker run say_hello_noone
-smaker run say_hello_noone --no-dryrun
-smaker run say_hello_world
-smaker run say_hello_world --no-dryrun
+smaker run -e say_hello_noone
+smaker run -e say_hello_noone --no-dryrun
+smaker run -e say_hello_world
+smaker run -e say_hello_world --no-dryrun
 ```
 
 You can always check if these ran by looking for the output files in
@@ -192,8 +192,8 @@ You can always check if these ran by looking for the output files in
 
 You can also change the `name` (not the `params`) via the command line:
 ```
-smaker fly --snakefile Snakefile --configfile hello_world/config.json - --name "World!"
-smaker fly --snakefile Snakefile --configfile hello_world/config.json --no-dryrun - --name "World!"
+smaker fly --snakefile Snakefile --configfile hello_world/config.json --name "World!"
+smaker fly --snakefile Snakefile --configfile hello_world/config.json --no-dryrun --name "World!"
 ```
 
 Because the endpoints aren't named, you have to supply the default
@@ -220,9 +220,9 @@ single-module workflow. The `simple_workflow` endpoint
 makes a dataframe -> transform it with a python script ->
 filters it with a bash command:
 ```
-smaker run simple_workflow
-smaker run simple_workflow --no-dryrun
-smaker run simple_workflow --no-dryrun --quiet
+smaker run -e run_simple
+smaker run -e run_simple --no-dryrun
+smaker run -e run_simple --no-dryrun --quiet
 ```
 
 A couple additional features in that `Snakefile`:
