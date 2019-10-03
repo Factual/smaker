@@ -19,7 +19,8 @@ setup(
         'snakemake>=5.4.5',
         'numpy>=1.14.2',
         'pandas>=0.24.2',
-        'tqdm>=4.32.2'
+        'tqdm>=4.32.2',
+        'pyarrow>=0.14.1'
     ],
     entry_points={
         'console_scripts': ['smaker=smaker.cli:main']

@@ -42,13 +42,14 @@ rule transform_dataframe:
         '{output_path}/%s/transformed.tsv' % run_wildcards
     log:
         '{output_path}/%s/log/transform_dataframe.log' % run_wildcards
-    shell:
-        'python3 simple/transform.py'
-        ' --input-path {input}'
-        ' --output-path {output}'
-        ' --multiplier {wildcards.multiplier}'
-        ' --{wildcards.sqrt}'
-        ' &>{log}'
+    run:
+        sqrt_flag = '--sqrt' if wildcards.sqrt == 'True' else '--no-sqrt'
+        shell('python3 simple/transform.py'
+              ' --input-path {input}'
+              ' --output-path {output}'
+              ' --multiplier {wildcards.multiplier}'
+              ' {sqrt_flag}'
+              ' &>{log}')
 
 # We switch back to bash here, filtering the tsv
 # output from the last rule. The "filtered.tsv" output

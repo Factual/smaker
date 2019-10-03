@@ -13,9 +13,9 @@ def main(input_path, output_path, multiplier, sqrt):
 
     if sqrt: out_df = multiplied.pow(.5)
     else: out_df = multiplied
-
     out_df.to_csv(output_path, sep='\t')
 
 if __name__=='__main__':
+
     main()
 
