@@ -5,7 +5,7 @@ with open('README.md', 'r') as f:
 
 setup(
     name='smaker',
-    version='0.0.5',
+    version='0.0.6',
     author='Max Hoffman',
     author_email='max@factual.com',
     description='Generalize snakemake workflows',
