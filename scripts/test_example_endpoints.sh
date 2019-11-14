@@ -17,8 +17,7 @@ smaker fly \
     --source=$SOURCE \
     --output-path=$OUTPUT_PATH \
     -F \
-    -v |\
-    #grep "$OUTPUT_PATH/$SOURCE"
+    -v
 
 smaker fly \
     -c simple/config.json \
@@ -26,8 +25,7 @@ smaker fly \
     --source $SOURCE \
     --output-path $OUTPUT_PATH \
     -F \
-    -v |\
-    #grep "$OUTPUT_PATH/default"
+    -v
 
 smaker fly \
     -c simple/config.json \
