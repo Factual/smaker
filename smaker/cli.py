@@ -18,7 +18,7 @@ def run_endpoint(endpoint, runners, api_opts):
 
 def run_on_the_fly(snakefile, configfile, extra_modules, extra_sources, workflow_opts, api_opts):
     workflow_opts['modules'] = { os.path.dirname(os.path.normpath(mod)): mod for mod in extra_modules if os.path.isfile(mod) }
-    workflow_opts['sources'] = extra_sources
+    workflow_opts['sources'] = list(extra_sources)
     SnakeRunner.run_undefined_endpoint(configfile, snakefile, workflow_opts, api_opts)
 
 @click.command(name='smaker', context_settings=dict(ignore_unknown_options=True, allow_extra_args=True))

@@ -2,7 +2,9 @@ import numpy as np
 import os
 
 def config_to_targets(targets, config):
-    return path_gen(targets, config['output_path'], parameters=config.get('params', {}),
+    return path_gen(targets,
+                    config['output_path'],
+                    parameters=config.get('params', {}),
                     sources=config.get('sources', []))
 
 def path_gen(targets, output_path, parameters={}, sources=[]):
