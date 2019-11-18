@@ -1,14 +1,13 @@
 from backports import tempfile
+import copy
 import functools
 import json
+import omegaconf
+from omegaconf import OmegaConf
 import os
 import snakemake
 import smaker
 from tqdm import tqdm
-import copy
-
-def pretty_dump(blob):
-    return json.dumps(blob, indent=4, sort_keys=True)
 
 class TqdmExtraFormat(tqdm):
     "Style change copied from tqdm documentation"
@@ -39,23 +38,7 @@ class SnakeRunner:
         self.cores = cores
         self.configfile = default_config
         self.default_snakefile = os.path.abspath(default_snakefile)
-        with open(default_config, 'r') as cf:
-            self.default_config = json.load(cf)
-
-    def _merge_configs(self, base, overrides, nested_fields=['params', 'modules', 'sources']):
-        for field in nested_fields:
-            if overrides.get(field, None) != None:
-                collection = overrides[field]
-                if isinstance(collection, dict):
-                    if base.get(field, None) == None: base[field] == {}
-                    base[field].update(overrides[field])
-                    del overrides[field]
-                elif isinstance(collection, (tuple, list, set)):
-                    if base.get(field, None) == None: base[field] == []
-                    base[field] += list(collection)
-                    del overrides[field]
-        base.update(overrides)
-        return base
+        self.default_config = OmegaConf.load(default_config)
 
     def run(self, endpoint, api_opts):
         dryrun = api_opts.pop('dryrun', True)
@@ -66,21 +49,15 @@ class SnakeRunner:
         if isinstance(config_overrides, dict): config_overrides = [config_overrides]
         assert len(config_overrides) > 0, "No configs found: %s" % endpoint
 
-        subworkflow_configs = []
-        for co in config_overrides:
-            base_config = copy.deepcopy(self.default_config)
-            workflow_config = self._merge_configs(base_config, co)
-            workflow_config['final_paths'], workflow_config['run_wildcards'] = smaker.config_to_targets([''], workflow_config)
-            subworkflow_configs += [workflow_config]
-
-        if not api_opts.get('quiet', False):
-            print('API options set:\n%s' % pretty_dump(api_opts))
-            print('Workflow opts:\n%s' % pretty_dump(subworkflow_configs))
+        config_overrides = [c if isinstance(c, omegaconf.dictconfig.DictConfig) else OmegaConf.create(c) for c in config_overrides]
+        subworkflow_configs = [OmegaConf.merge(self.default_config, c) for c in config_overrides]
 
         with tempfile.TemporaryDirectory() as temp_dir:
             config_paths = [os.path.abspath(os.path.join(temp_dir, 'config%s.json' % idx)) for idx in range(len(subworkflow_configs))]
             for config, path in zip(subworkflow_configs, config_paths):
-                with open(path, 'w+') as f: json.dump(config, f)
+                if config.get('params') != None:
+                    config['final_paths'], config['run_wildcards'] = smaker.config_to_targets([''], config)
+                config.save(path)
 
             pbar = TqdmExtraFormat(config_paths, ascii=True , bar_format="{total_time}: {percentage:.0f}%|{bar}{r_bar}")
             for i, cpath in enumerate(pbar):
@@ -94,7 +71,6 @@ class SnakeRunner:
 
     @classmethod
     def run_undefined_endpoint(cls, configfile, snakefile, workflow_opts={}, api_opts={'cores': 2}):
-        print('Running with dynamic workflow opts:\n%s' % pretty_dump(workflow_opts))
         sn = cls(configfile, snakefile)
         sn.add_endpoint('_undefined', workflow_opts)
         sn.run('_undefined', api_opts)
