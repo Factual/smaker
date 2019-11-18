@@ -1,13 +1,13 @@
 from backports import tempfile
+import copy
 import functools
 import json
+import omegaconf
+from omegaconf import OmegaConf
 import os
 import snakemake
 import smaker
 from tqdm import tqdm
-import copy
-from omegaconf import OmegaConf
-import omegaconf
 
 class TqdmExtraFormat(tqdm):
     "Style change copied from tqdm documentation"

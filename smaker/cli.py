@@ -3,8 +3,8 @@ from importlib.util import spec_from_loader, module_from_spec
 from importlib.machinery import SourceFileLoader
 import json
 import os
-import sys
 from smaker.runner import SnakeRunner
+import sys
 
 def list_endpoints(runners):
     return [ print(e) for r in runners for e in r.endpoints ]
