@@ -18,7 +18,6 @@ def path_gen(targets, output_path, parameters={}, sources=[]):
     for k, vals in parameters.items():
         assert '-' not in k, 'Cannot put hyphens in parameter name: %s' % k
         if not isinstance(vals, (list, np.ndarray,  omegaconf.listconfig.ListConfig)):
-            print(type(vals))
             vals = [vals]
         opts.append((k,vals))
 
