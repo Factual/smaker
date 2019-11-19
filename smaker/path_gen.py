@@ -1,4 +1,5 @@
 import numpy as np
+import omegaconf
 import os
 
 def config_to_targets(targets, config):
@@ -16,7 +17,7 @@ def path_gen(targets, output_path, parameters={}, sources=[]):
     opts = []
     for k, vals in parameters.items():
         assert '-' not in k, 'Cannot put hyphens in parameter name: %s' % k
-        if not isinstance(vals, (list, np.ndarray)):
+        if not isinstance(vals, (list, np.ndarray,  omegaconf.listconfig.ListConfig)):
             vals = [vals]
         opts.append((k,vals))
 
